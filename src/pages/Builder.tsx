@@ -42,10 +42,9 @@ const getSteps = (t: (key: string) => string) => [
 const BuilderContent = () => {
   const { currentStep, setCurrentStep, cvData, selectedTemplate, creationMode, setCreationMode } = useCVContext();
   const { t } = useSettings();
-  const [showPreview, setShowPreview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [rightPanel, setRightPanel] = useState<'ai' | 'job' | 'sections' | 'history'>('ai');
+  const [rightPanel, setRightPanel] = useState<'preview' | 'ai' | 'job' | 'sections' | 'history'>('preview');
 
   const steps = getSteps(t);
   const CurrentStepComponent = steps[currentStep].component;
@@ -132,15 +131,6 @@ const BuilderContent = () => {
             <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
               <Settings className="w-5 h-5" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPreview(!showPreview)}
-              className="hidden lg:flex"
-            >
-              <Eye className="w-4 h-4" />
-              {showPreview ? t('btn.hidePreview') : t('btn.showPreview')}
-            </Button>
             <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting}>
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               {t('btn.export')}
@@ -188,9 +178,9 @@ const BuilderContent = () => {
             </div>
 
             {/* Main Content */}
-            <div className={`grid gap-8 ${showPreview ? 'lg:grid-cols-2' : 'lg:grid-cols-3'}`}>
+            <div className="grid gap-8 lg:grid-cols-3">
               {/* Form Section */}
-              <div className={showPreview ? '' : 'lg:col-span-2'}>
+              <div className="lg:col-span-2">
                 <div className="card-elevated p-8">
                   <AnimatePresence mode="wait">
                     <CurrentStepComponent key={currentStep} />
@@ -227,25 +217,23 @@ const BuilderContent = () => {
                 </div>
               </div>
 
-              {/* Right Panel */}
-              {showPreview ? (
-                <CVPreview />
-              ) : (
-                <div className="hidden lg:block">
-                  <Tabs value={rightPanel} onValueChange={(v) => setRightPanel(v as any)} className="space-y-4">
-                    <TabsList className="grid grid-cols-4">
-                      <TabsTrigger value="ai" className="gap-1"><Wand2 className="w-3 h-3" /></TabsTrigger>
-                      <TabsTrigger value="job" className="gap-1"><Briefcase className="w-3 h-3" /></TabsTrigger>
-                      <TabsTrigger value="sections" className="gap-1"><Layers className="w-3 h-3" /></TabsTrigger>
-                      <TabsTrigger value="history" className="gap-1"><History className="w-3 h-3" /></TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="ai"><AIAnalysisPanel /></TabsContent>
-                    <TabsContent value="job"><div className="card-elevated p-6"><JobMatchPanel /></div></TabsContent>
-                    <TabsContent value="sections"><div className="card-elevated p-6"><SectionControlPanel /></div></TabsContent>
-                    <TabsContent value="history"><div className="card-elevated p-6"><VersionHistoryPanel /></div></TabsContent>
-                  </Tabs>
-                </div>
-              )}
+              {/* Right Panel - Always show tabs, optionally with preview */}
+              <div className="hidden lg:block space-y-4">
+                <Tabs value={rightPanel} onValueChange={(v) => setRightPanel(v as any)} className="space-y-4">
+                  <TabsList className="grid grid-cols-5">
+                    <TabsTrigger value="preview" className="gap-1"><Eye className="w-3 h-3" /></TabsTrigger>
+                    <TabsTrigger value="ai" className="gap-1"><Wand2 className="w-3 h-3" /></TabsTrigger>
+                    <TabsTrigger value="job" className="gap-1"><Briefcase className="w-3 h-3" /></TabsTrigger>
+                    <TabsTrigger value="sections" className="gap-1"><Layers className="w-3 h-3" /></TabsTrigger>
+                    <TabsTrigger value="history" className="gap-1"><History className="w-3 h-3" /></TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="preview"><CVPreview /></TabsContent>
+                  <TabsContent value="ai"><AIAnalysisPanel /></TabsContent>
+                  <TabsContent value="job"><div className="card-elevated p-6"><JobMatchPanel /></div></TabsContent>
+                  <TabsContent value="sections"><div className="card-elevated p-6"><SectionControlPanel /></div></TabsContent>
+                  <TabsContent value="history"><div className="card-elevated p-6"><VersionHistoryPanel /></div></TabsContent>
+                </Tabs>
+              </div>
             </div>
           </>
         )}
