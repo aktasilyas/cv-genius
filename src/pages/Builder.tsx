@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Download, Eye, FileText, Loader2, Settings, Wand2, PenTool, Layers, History, Briefcase } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Eye, FileText, Loader2, Settings, Wand2, PenTool, Layers, History, Briefcase, Save, LayoutDashboard } from 'lucide-react';
 import { CVProvider, useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
+import { useAuth } from '@/hooks/useAuth';
+import { cvService } from '@/services/cvService';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PersonalInfoStep from '@/components/wizard/PersonalInfoStep';
@@ -27,7 +29,8 @@ import CreativeTemplate from '@/components/templates/CreativeTemplate';
 import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
 import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
 import AuthButton from '@/components/auth/AuthButton';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const getSteps = (t: (key: string) => string) => [
   { id: 0, titleKey: 'builder.personalInfo', component: PersonalInfoStep },
@@ -42,9 +45,20 @@ const getSteps = (t: (key: string) => string) => [
 const BuilderContent = () => {
   const { currentStep, setCurrentStep, cvData, selectedTemplate, creationMode, setCreationMode } = useCVContext();
   const { t } = useSettings();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [rightPanel, setRightPanel] = useState<'preview' | 'ai' | 'job' | 'sections' | 'history'>('preview');
+  const [editingCVId, setEditingCVId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedId = localStorage.getItem('editing-cv-id');
+    if (savedId) {
+      setEditingCVId(savedId);
+    }
+  }, []);
 
   const steps = getSteps(t);
   const CurrentStepComponent = steps[currentStep].component;
@@ -91,6 +105,39 @@ const BuilderContent = () => {
     setIsExporting(false);
   };
 
+  const handleSaveCV = async () => {
+    if (!isAuthenticated) {
+      toast.error(t('builder.loginToSave') || 'Please sign in to save your CV');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const title = cvData.personalInfo.fullName 
+        ? `${cvData.personalInfo.fullName}'s CV`
+        : t('dashboard.untitled') || 'Untitled CV';
+
+      if (editingCVId) {
+        await cvService.updateCV(editingCVId, {
+          cv_data: cvData,
+          selected_template: selectedTemplate,
+          title,
+        });
+        toast.success(t('builder.updateSuccess') || 'CV updated successfully');
+      } else {
+        const newCV = await cvService.createCV(title, cvData, selectedTemplate);
+        setEditingCVId(newCV.id);
+        localStorage.setItem('editing-cv-id', newCV.id);
+        toast.success(t('builder.saveSuccess') || 'CV saved successfully');
+      }
+    } catch (error) {
+      console.error('Error saving CV:', error);
+      toast.error(t('builder.saveError') || 'Failed to save CV');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -126,11 +173,37 @@ const BuilderContent = () => {
               </Button>
             </div>
 
+            {isAuthenticated && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/dashboard')}
+                className="gap-2"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span className="hidden md:inline">{t('nav.dashboard') || 'My CVs'}</span>
+              </Button>
+            )}
+
             <AuthButton />
             
             <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
               <Settings className="w-5 h-5" />
             </Button>
+
+            {isAuthenticated && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSaveCV}
+                disabled={isSaving}
+                className="gap-2"
+              >
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span className="hidden md:inline">{t('btn.save') || 'Save'}</span>
+              </Button>
+            )}
+
             <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting}>
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               {t('btn.export')}
