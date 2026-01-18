@@ -60,7 +60,7 @@ export interface AIFeedback {
   applied?: boolean;
 }
 
-export type CVTemplate = 'modern' | 'classic' | 'minimal';
+export type CVTemplate = 'modern' | 'classic' | 'minimal' | 'creative' | 'executive' | 'technical';
 
 export const initialCVData: CVData = {
   personalInfo: {
