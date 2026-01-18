@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useSettings } from '@/context/SettingsContext';
-import SettingsModal from '@/components/settings/SettingsModal';
+import SettingsSidebar from '@/components/settings/SettingsSidebar';
 import AuthButton from '@/components/auth/AuthButton';
 
 const Navbar = () => {
@@ -114,7 +114,7 @@ const Navbar = () => {
         </div>
       </motion.nav>
       
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsSidebar isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </>
   );
 };

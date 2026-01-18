@@ -97,7 +97,10 @@ export const CVProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     return saved ? JSON.parse(saved) : initialCVData;
   });
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate>('modern');
+  const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate>(() => {
+    const saved = localStorage.getItem('selected-template');
+    return (saved as CVTemplate) || 'modern';
+  });
   const [aiFeedback, setAIFeedback] = useState<AIFeedback[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [cvScore, setCVScore] = useState<CVScore | null>(null);
@@ -106,6 +109,16 @@ export const CVProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [creationMode, setCreationMode] = useState<CVCreationMode>('structured');
   const [aiTextInput, setAITextInput] = useState('');
   const [isParsingText, setIsParsingText] = useState(false);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem('cv-data', JSON.stringify(cvData));
+  }, [cvData]);
+
+  // Save template to localStorage
+  useEffect(() => {
+    localStorage.setItem('selected-template', selectedTemplate);
+  }, [selectedTemplate]);
 
   // Save to localStorage
   useEffect(() => {
