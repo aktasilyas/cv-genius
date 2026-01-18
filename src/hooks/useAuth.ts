@@ -28,13 +28,37 @@ export const useAuth = () => {
   }, []);
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    // In embedded previews, Google blocks OAuth flows inside iframes.
+    // Use skipBrowserRedirect and open the consent screen in a new tab.
+    const redirectTo = window.location.origin;
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
-      }
+        redirectTo,
+        skipBrowserRedirect: true,
+      },
     });
+
     if (error) throw error;
+
+    const url = data?.url;
+    if (!url) return;
+
+    const isInIframe = (() => {
+      try {
+        return window.self !== window.top;
+      } catch {
+        return true;
+      }
+    })();
+
+    if (isInIframe) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    window.location.assign(url);
   };
 
   const signOut = async () => {
