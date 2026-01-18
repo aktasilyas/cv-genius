@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, Reorder } from 'framer-motion';
 import { Eye, EyeOff, GripVertical, Layers } from 'lucide-react';
 import { useCVContext } from '@/context/CVContext';
@@ -19,6 +19,11 @@ const SectionControlPanel = () => {
   const { cvData, toggleSectionVisibility, updateSectionOrder } = useCVContext();
   const { t } = useSettings();
   const [items, setItems] = useState(cvData.sectionOrder);
+
+  // Sync items with cvData.sectionOrder when it changes
+  useEffect(() => {
+    setItems(cvData.sectionOrder);
+  }, [cvData.sectionOrder]);
 
   const getSectionLabel = (id: string) => {
     const labels: Record<string, string> = {
