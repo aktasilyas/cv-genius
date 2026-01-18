@@ -2,6 +2,9 @@ import { useCVContext } from '@/context/CVContext';
 import ModernTemplate from '@/components/templates/ModernTemplate';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import MinimalTemplate from '@/components/templates/MinimalTemplate';
+import CreativeTemplate from '@/components/templates/CreativeTemplate';
+import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
+import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
 
 const CVPreview = () => {
   const { cvData, selectedTemplate } = useCVContext();
@@ -14,6 +17,12 @@ const CVPreview = () => {
         return <ClassicTemplate data={cvData} />;
       case 'minimal':
         return <MinimalTemplate data={cvData} />;
+      case 'creative':
+        return <CreativeTemplate data={cvData} />;
+      case 'executive':
+        return <ExecutiveTemplate data={cvData} />;
+      case 'technical':
+        return <TechnicalTemplate data={cvData} />;
       default:
         return <ModernTemplate data={cvData} />;
     }

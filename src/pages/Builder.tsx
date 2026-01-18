@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Download, Eye, FileText, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Eye, FileText, Loader2, Settings } from 'lucide-react';
 import { CVProvider, useCVContext } from '@/context/CVContext';
+import { useSettings } from '@/context/SettingsContext';
 import { Button } from '@/components/ui/button';
 import PersonalInfoStep from '@/components/wizard/PersonalInfoStep';
 import ExperienceStep from '@/components/wizard/ExperienceStep';
@@ -11,9 +12,13 @@ import SummaryStep from '@/components/wizard/SummaryStep';
 import CVPreview from '@/components/builder/CVPreview';
 import AIAnalysisPanel from '@/components/builder/AIAnalysisPanel';
 import TemplateSelector from '@/components/builder/TemplateSelector';
+import SettingsModal from '@/components/settings/SettingsModal';
 import ModernTemplate from '@/components/templates/ModernTemplate';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import MinimalTemplate from '@/components/templates/MinimalTemplate';
+import CreativeTemplate from '@/components/templates/CreativeTemplate';
+import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
+import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
 import { Link } from 'react-router-dom';
 
 const steps = [
@@ -26,10 +31,24 @@ const steps = [
 
 const BuilderContent = () => {
   const { currentStep, setCurrentStep, cvData, selectedTemplate } = useCVContext();
+  const { t } = useSettings();
   const [showPreview, setShowPreview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const CurrentStepComponent = steps[currentStep].component;
+
+  const getTemplateComponent = () => {
+    switch (selectedTemplate) {
+      case 'modern': return ModernTemplate;
+      case 'classic': return ClassicTemplate;
+      case 'minimal': return MinimalTemplate;
+      case 'creative': return CreativeTemplate;
+      case 'executive': return ExecutiveTemplate;
+      case 'technical': return TechnicalTemplate;
+      default: return ModernTemplate;
+    }
+  };
 
   const exportToPDF = async () => {
     setIsExporting(true);
@@ -48,9 +67,7 @@ const BuilderContent = () => {
     const { createRoot } = await import('react-dom/client');
     const root = createRoot(container);
     
-    const TemplateComponent = selectedTemplate === 'modern' ? ModernTemplate 
-      : selectedTemplate === 'classic' ? ClassicTemplate 
-      : MinimalTemplate;
+    const TemplateComponent = getTemplateComponent();
 
     root.render(<TemplateComponent data={cvData} />);
 
@@ -88,13 +105,20 @@ const BuilderContent = () => {
 
           <div className="flex items-center gap-3">
             <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+            <Button
               variant="outline"
               size="sm"
               onClick={() => setShowPreview(!showPreview)}
               className="hidden lg:flex"
             >
               <Eye className="w-4 h-4" />
-              {showPreview ? 'Hide Preview' : 'Show Preview'}
+              {showPreview ? t('btn.hidePreview') : t('btn.showPreview')}
             </Button>
             <Button
               variant="accent"
@@ -103,11 +127,13 @@ const BuilderContent = () => {
               disabled={isExporting}
             >
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              Export PDF
+              {t('btn.export')}
             </Button>
           </div>
         </div>
       </header>
+      
+      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
       <div className="container mx-auto px-4 py-8">
         {/* Progress Steps */}
