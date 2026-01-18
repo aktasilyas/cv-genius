@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import AuthButton from '@/components/auth/AuthButton';
-import SettingsModal from '@/components/settings/SettingsModal';
+import SettingsSidebar from '@/components/settings/SettingsSidebar';
 
 const Dashboard = () => {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
@@ -149,7 +149,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsSidebar isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">

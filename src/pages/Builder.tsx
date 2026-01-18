@@ -21,7 +21,7 @@ import TemplateSelector from '@/components/builder/TemplateSelector';
 import SectionControlPanel from '@/components/builder/SectionControlPanel';
 import VersionHistoryPanel from '@/components/builder/VersionHistoryPanel';
 import JobMatchPanel from '@/components/builder/JobMatchPanel';
-import SettingsModal from '@/components/settings/SettingsModal';
+import SettingsSidebar from '@/components/settings/SettingsSidebar';
 import ModernTemplate from '@/components/templates/ModernTemplate';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import MinimalTemplate from '@/components/templates/MinimalTemplate';
@@ -212,7 +212,7 @@ const BuilderContent = () => {
         </div>
       </header>
       
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsSidebar isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
       <div className="container mx-auto px-4 py-8">
         {creationMode === 'ai-text' ? (
