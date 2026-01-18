@@ -86,18 +86,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                     <h3 className="font-semibold">{t('settings.theme')}</h3>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    {themes.map((t) => (
+                    {themes.map((themeOption) => (
                       <button
-                        key={t.id}
-                        onClick={() => setTheme(t.id)}
+                        key={themeOption.id}
+                        onClick={() => setTheme(themeOption.id)}
                         className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                          theme === t.id
+                          theme === themeOption.id
                             ? 'border-accent bg-accent/10'
                             : 'border-border hover:border-accent/50'
                         }`}
                       >
-                        <span className="text-2xl">{t.icon}</span>
-                        <span className="text-sm font-medium">{t.label}</span>
+                        <span className="text-2xl">{themeOption.icon}</span>
+                        <span className="text-sm font-medium">{themeOption.label}</span>
                       </button>
                     ))}
                   </div>
