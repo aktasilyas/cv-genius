@@ -1,0 +1,79 @@
+import { motion } from 'framer-motion';
+import { ArrowRight, FileText } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { CVProvider } from '@/context/CVContext';
+import TemplateSelector from '@/components/builder/TemplateSelector';
+
+const TemplatesContent = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 glass border-b border-border">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
+              <FileText className="w-5 h-5 text-accent-foreground" />
+            </div>
+            <span className="text-xl font-display font-semibold">CVCraft</span>
+          </Link>
+          <Button variant="accent" onClick={() => navigate('/builder')}>
+            Start Building
+          </Button>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-4xl md:text-5xl font-display font-semibold mb-4">
+            Choose Your Template
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Select from our professionally designed templates. Each one is ATS-friendly and optimized for success.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="max-w-5xl mx-auto"
+        >
+          <TemplateSelector />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="text-center mt-12"
+        >
+          <Button
+            variant="hero"
+            onClick={() => navigate('/builder')}
+            className="group"
+          >
+            Start Building Your CV
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </motion.div>
+      </main>
+    </div>
+  );
+};
+
+const Templates = () => {
+  return (
+    <CVProvider>
+      <TemplatesContent />
+    </CVProvider>
+  );
+};
+
+export default Templates;
