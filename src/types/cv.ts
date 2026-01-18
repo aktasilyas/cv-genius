@@ -42,6 +42,29 @@ export interface Language {
   proficiency: 'basic' | 'conversational' | 'professional' | 'native';
 }
 
+export interface Certificate {
+  id: string;
+  name: string;
+  issuer: string;
+  date: string;
+  url?: string;
+}
+
+export interface SectionVisibility {
+  personalInfo: boolean;
+  summary: boolean;
+  experience: boolean;
+  education: boolean;
+  skills: boolean;
+  languages: boolean;
+  certificates: boolean;
+}
+
+export interface SectionOrder {
+  id: keyof Omit<SectionVisibility, 'personalInfo'>;
+  order: number;
+}
+
 export interface CVData {
   personalInfo: PersonalInfo;
   summary: string;
@@ -49,6 +72,9 @@ export interface CVData {
   education: Education[];
   skills: Skill[];
   languages: Language[];
+  certificates: Certificate[];
+  sectionVisibility: SectionVisibility;
+  sectionOrder: SectionOrder[];
 }
 
 export interface AIFeedback {
@@ -57,10 +83,58 @@ export interface AIFeedback {
   type: 'warning' | 'suggestion' | 'improvement';
   message: string;
   suggestion?: string;
+  explanation?: string;
+  improvedText?: string;
   applied?: boolean;
 }
 
+export interface CVScore {
+  overall: number;
+  breakdown: {
+    completeness: number;
+    quality: number;
+    atsCompatibility: number;
+    impact: number;
+  };
+  recommendations: string[];
+}
+
+export interface CVVersion {
+  id: string;
+  timestamp: Date;
+  label: string;
+  data: CVData;
+}
+
+export interface JobMatch {
+  score: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  suggestions: string[];
+}
+
 export type CVTemplate = 'modern' | 'classic' | 'minimal' | 'creative' | 'executive' | 'technical';
+
+export type CVCreationMode = 'structured' | 'ai-text';
+
+export const defaultSectionOrder: SectionOrder[] = [
+  { id: 'summary', order: 0 },
+  { id: 'experience', order: 1 },
+  { id: 'education', order: 2 },
+  { id: 'skills', order: 3 },
+  { id: 'languages', order: 4 },
+  { id: 'certificates', order: 5 },
+];
+
+export const defaultSectionVisibility: SectionVisibility = {
+  personalInfo: true,
+  summary: true,
+  experience: true,
+  education: true,
+  skills: true,
+  languages: true,
+  certificates: true,
+};
 
 export const initialCVData: CVData = {
   personalInfo: {
@@ -77,4 +151,7 @@ export const initialCVData: CVData = {
   education: [],
   skills: [],
   languages: [],
+  certificates: [],
+  sectionVisibility: defaultSectionVisibility,
+  sectionOrder: defaultSectionOrder,
 };
