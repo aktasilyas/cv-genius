@@ -1,0 +1,139 @@
+import { CVData } from '@/types/cv';
+
+interface MinimalTemplateProps {
+  data: CVData;
+}
+
+const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data }) => {
+  const { personalInfo, summary, experience, education, skills, languages } = data;
+
+  const formatDate = (date: string) => {
+    if (!date) return '';
+    const [year, month] = date.split('-');
+    return `${month}/${year}`;
+  };
+
+  return (
+    <div className="bg-white text-gray-900 p-10 min-h-[1123px] font-sans text-sm">
+      {/* Header */}
+      <header className="mb-8">
+        <h1 className="text-4xl font-light text-gray-900 tracking-tight mb-1">
+          {personalInfo.fullName || 'Your Name'}
+        </h1>
+        <p className="text-lg text-gray-500 mb-4">
+          {personalInfo.title || 'Professional Title'}
+        </p>
+        <div className="flex flex-wrap gap-4 text-gray-500 text-xs">
+          {personalInfo.email && <span>{personalInfo.email}</span>}
+          {personalInfo.phone && <span>•</span>}
+          {personalInfo.phone && <span>{personalInfo.phone}</span>}
+          {personalInfo.location && <span>•</span>}
+          {personalInfo.location && <span>{personalInfo.location}</span>}
+        </div>
+        <div className="flex gap-4 text-gray-500 text-xs mt-1">
+          {personalInfo.linkedin && <span>{personalInfo.linkedin}</span>}
+          {personalInfo.website && <span>•</span>}
+          {personalInfo.website && <span>{personalInfo.website}</span>}
+        </div>
+      </header>
+
+      {/* Summary */}
+      {summary && (
+        <section className="mb-8">
+          <p className="text-gray-700 leading-relaxed border-l-2 border-gray-200 pl-4">{summary}</p>
+        </section>
+      )}
+
+      {/* Experience */}
+      {experience.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+            Experience
+          </h2>
+          <div className="space-y-6">
+            {experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <div>
+                    <span className="font-medium text-gray-900">{exp.position || 'Position'}</span>
+                    <span className="text-gray-400 mx-2">at</span>
+                    <span className="text-gray-700">{exp.company || 'Company'}</span>
+                  </div>
+                  <span className="text-gray-400 text-xs">
+                    {formatDate(exp.startDate)} – {exp.current ? 'Present' : formatDate(exp.endDate)}
+                  </span>
+                </div>
+                {exp.description && (
+                  <p className="text-gray-600 text-xs mt-2 whitespace-pre-line">{exp.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Education */}
+      {education.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+            Education
+          </h2>
+          <div className="space-y-4">
+            {education.map((edu) => (
+              <div key={edu.id} className="flex justify-between items-baseline">
+                <div>
+                  <span className="font-medium text-gray-900">{edu.degree}</span>
+                  <span className="text-gray-400 mx-1">in</span>
+                  <span className="text-gray-700">{edu.field}</span>
+                  <span className="text-gray-400 mx-2">—</span>
+                  <span className="text-gray-600">{edu.institution}</span>
+                  {edu.gpa && <span className="text-gray-400 ml-2">({edu.gpa})</span>}
+                </div>
+                <span className="text-gray-400 text-xs">{formatDate(edu.endDate)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div className="grid grid-cols-2 gap-8">
+        {/* Skills */}
+        {skills.length > 0 && (
+          <section>
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+              Skills
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {skills.map((skill) => (
+                <span
+                  key={skill.id}
+                  className="text-gray-700 text-xs"
+                >
+                  {skill.name}{skills.indexOf(skill) < skills.length - 1 ? ' •' : ''}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Languages */}
+        {languages.length > 0 && (
+          <section>
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+              Languages
+            </h2>
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {languages.map((lang) => (
+                <span key={lang.id} className="text-gray-700 text-xs">
+                  {lang.name} <span className="text-gray-400">({lang.proficiency})</span>
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default MinimalTemplate;
