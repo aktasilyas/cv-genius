@@ -103,6 +103,29 @@ export const translations: Record<Language, Record<string, string>> = {
     'btn.addLanguage': 'Add Language',
     'btn.addCertificate': 'Add Certificate',
     
+    // Empty states
+    'empty.experience': 'No experience added yet',
+    'empty.addFirstExperience': 'Add Your First Experience',
+    'empty.education': 'No education added yet',
+    'empty.addFirstEducation': 'Add Your Education',
+    'empty.skills': 'No skills added yet',
+    'empty.addFirstSkill': 'Add Your First Skill',
+    'empty.languages': 'No languages added yet',
+    'empty.addFirstLanguage': 'Add Your First Language',
+    
+    // Placeholders
+    'placeholder.skill': 'e.g., JavaScript',
+    'placeholder.description': 'Describe your responsibilities and achievements. Use bullet points for better readability.',
+    'placeholder.summary': 'Passionate software engineer with 5+ years of experience in building scalable web applications...',
+    
+    // Summary tips
+    'summary.charactersRecommended': 'characters recommended',
+    'summary.proTips': 'Pro Tips',
+    'summary.tip1': 'Keep it concise (3-4 sentences)',
+    'summary.tip2': 'Include your years of experience',
+    'summary.tip3': 'Mention your key skills and achievements',
+    'summary.tip4': "Tailor it to the job you're applying for",
+    
     // AI Analysis
     'ai.title': 'AI Analysis',
     'ai.analyzing': 'Analyzing your CV...',
@@ -304,6 +327,29 @@ export const translations: Record<Language, Record<string, string>> = {
     'btn.addSkill': 'Yetenek Ekle',
     'btn.addLanguage': 'Dil Ekle',
     'btn.addCertificate': 'Sertifika Ekle',
+    
+    // Empty states
+    'empty.experience': 'Henüz deneyim eklenmedi',
+    'empty.addFirstExperience': 'İlk Deneyiminizi Ekleyin',
+    'empty.education': 'Henüz eğitim eklenmedi',
+    'empty.addFirstEducation': 'Eğitiminizi Ekleyin',
+    'empty.skills': 'Henüz yetenek eklenmedi',
+    'empty.addFirstSkill': 'İlk Yeteneğinizi Ekleyin',
+    'empty.languages': 'Henüz dil eklenmedi',
+    'empty.addFirstLanguage': 'İlk Dilinizi Ekleyin',
+    
+    // Placeholders
+    'placeholder.skill': 'örn., JavaScript',
+    'placeholder.description': 'Sorumluluklarınızı ve başarılarınızı açıklayın. Daha iyi okunabilirlik için madde işaretleri kullanın.',
+    'placeholder.summary': '5+ yıllık deneyime sahip tutkulu yazılım mühendisi, ölçeklenebilir web uygulamaları geliştirmede uzman...',
+    
+    // Summary tips
+    'summary.charactersRecommended': 'karakter önerilir',
+    'summary.proTips': 'İpuçları',
+    'summary.tip1': 'Kısa ve öz tutun (3-4 cümle)',
+    'summary.tip2': 'Deneyim yıllarınızı belirtin',
+    'summary.tip3': 'Temel becerilerinizi ve başarılarınızı belirtin',
+    'summary.tip4': 'Başvurduğunuz işe göre uyarlayın',
     
     // AI Analysis
     'ai.title': 'Yapay Zeka Analizi',
