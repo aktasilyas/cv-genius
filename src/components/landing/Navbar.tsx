@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useSettings } from '@/context/SettingsContext';
 import SettingsModal from '@/components/settings/SettingsModal';
+import AuthButton from '@/components/auth/AuthButton';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,9 +59,7 @@ const Navbar = () => {
               >
                 <Settings className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" onClick={() => navigate('/builder')}>
-                {t('nav.signIn')}
-              </Button>
+              <AuthButton />
               <Button variant="accent" onClick={() => navigate('/builder')}>
                 {t('nav.createCV')}
               </Button>
@@ -104,9 +103,7 @@ const Navbar = () => {
                   </Link>
                 ))}
                 <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                  <Button variant="outline" onClick={() => navigate('/builder')}>
-                    {t('nav.signIn')}
-                  </Button>
+                  <AuthButton />
                   <Button variant="accent" onClick={() => navigate('/builder')}>
                     {t('nav.createCV')}
                   </Button>

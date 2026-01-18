@@ -1,11 +1,12 @@
 import { CVData } from '@/types/cv';
+import { Award } from 'lucide-react';
 
 interface CreativeTemplateProps {
   data: CVData;
 }
 
 const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
-  const { personalInfo, summary, experience, education, skills, languages } = data;
+  const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
 
   const formatDate = (date: string) => {
     if (!date) return '';
@@ -13,6 +14,8 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
+
+  const visibility = sectionVisibility || { summary: true, experience: true, education: true, skills: true, languages: true, certificates: true };
 
   return (
     <div className="bg-white text-gray-900 min-h-[1123px] font-sans text-sm">
@@ -37,11 +40,9 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
         {/* Sidebar */}
         <div className="bg-gray-900 text-white p-6 min-h-full">
           {/* Skills */}
-          {skills.length > 0 && (
+          {visibility.skills && skills.length > 0 && (
             <section className="mb-8">
-              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">
-                Skills
-              </h2>
+              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">Skills</h2>
               <div className="space-y-3">
                 {skills.map((skill) => (
                   <div key={skill.id}>
@@ -66,11 +67,9 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
           )}
 
           {/* Languages */}
-          {languages.length > 0 && (
+          {visibility.languages && languages.length > 0 && (
             <section className="mb-8">
-              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">
-                Languages
-              </h2>
+              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">Languages</h2>
               <div className="space-y-2">
                 {languages.map((lang) => (
                   <div key={lang.id} className="flex justify-between text-xs">
@@ -83,11 +82,9 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
           )}
 
           {/* Education */}
-          {education.length > 0 && (
-            <section>
-              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">
-                Education
-              </h2>
+          {visibility.education && education.length > 0 && (
+            <section className="mb-8">
+              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">Education</h2>
               <div className="space-y-4">
                 {education.map((edu) => (
                   <div key={edu.id} className="text-xs">
@@ -100,26 +97,42 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
               </div>
             </section>
           )}
+
+          {/* Certificates */}
+          {visibility.certificates && certificates && certificates.length > 0 && (
+            <section>
+              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">Certificates</h2>
+              <div className="space-y-3">
+                {certificates.map((cert) => (
+                  <div key={cert.id} className="text-xs">
+                    <div className="flex items-start gap-2">
+                      <Award className="w-3 h-3 text-pink-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-white">{cert.name}</p>
+                        <p className="text-gray-400">{cert.issuer}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         {/* Main Content */}
         <div className="col-span-2 p-8">
           {/* Summary */}
-          {summary && (
+          {visibility.summary && summary && (
             <section className="mb-8">
-              <h2 className="text-lg font-bold text-purple-600 mb-3 uppercase tracking-wider">
-                About Me
-              </h2>
+              <h2 className="text-lg font-bold text-purple-600 mb-3 uppercase tracking-wider">About Me</h2>
               <p className="text-gray-700 leading-relaxed">{summary}</p>
             </section>
           )}
 
           {/* Experience */}
-          {experience.length > 0 && (
+          {visibility.experience && experience.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-purple-600 mb-4 uppercase tracking-wider">
-                Experience
-              </h2>
+              <h2 className="text-lg font-bold text-purple-600 mb-4 uppercase tracking-wider">Experience</h2>
               <div className="space-y-6">
                 {experience.map((exp) => (
                   <div key={exp.id} className="relative pl-6 border-l-2 border-purple-200">

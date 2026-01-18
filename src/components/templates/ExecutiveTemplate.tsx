@@ -1,12 +1,12 @@
 import { CVData } from '@/types/cv';
-import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
+import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
 
 interface ExecutiveTemplateProps {
   data: CVData;
 }
 
 const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
-  const { personalInfo, summary, experience, education, skills, languages } = data;
+  const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
 
   const formatDate = (date: string) => {
     if (!date) return '';
@@ -14,6 +14,8 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
+
+  const visibility = sectionVisibility || { summary: true, experience: true, education: true, skills: true, languages: true, certificates: true };
 
   return (
     <div className="bg-white text-gray-900 min-h-[1123px] font-serif text-sm">
@@ -58,11 +60,9 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
 
       <div className="p-10 max-w-4xl mx-auto">
         {/* Executive Summary */}
-        {summary && (
+        {visibility.summary && summary && (
           <section className="mb-10 text-center">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">
-              Executive Summary
-            </h2>
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">Executive Summary</h2>
             <p className="text-gray-600 leading-relaxed italic">{summary}</p>
           </section>
         )}
@@ -70,11 +70,9 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
         <div className="w-full h-px bg-slate-200 my-8" />
 
         {/* Experience */}
-        {experience.length > 0 && (
+        {visibility.experience && experience.length > 0 && (
           <section className="mb-10">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-6 text-center">
-              Professional Experience
-            </h2>
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-6 text-center">Professional Experience</h2>
             <div className="space-y-6">
               {experience.map((exp) => (
                 <div key={exp.id} className="border-l-2 border-amber-500 pl-6">
@@ -98,11 +96,9 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
 
         <div className="grid grid-cols-2 gap-10">
           {/* Education */}
-          {education.length > 0 && (
+          {visibility.education && education.length > 0 && (
             <section>
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">
-                Education
-              </h2>
+              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">Education</h2>
               <div className="space-y-4">
                 {education.map((edu) => (
                   <div key={edu.id}>
@@ -117,17 +113,12 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
 
           <div className="space-y-8">
             {/* Core Competencies */}
-            {skills.length > 0 && (
+            {visibility.skills && skills.length > 0 && (
               <section>
-                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">
-                  Core Competencies
-                </h2>
+                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">Core Competencies</h2>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill) => (
-                    <span
-                      key={skill.id}
-                      className="px-3 py-1 bg-slate-100 text-slate-700 text-xs border border-slate-200"
-                    >
+                    <span key={skill.id} className="px-3 py-1 bg-slate-100 text-slate-700 text-xs border border-slate-200">
                       {skill.name}
                     </span>
                   ))}
@@ -136,11 +127,9 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
             )}
 
             {/* Languages */}
-            {languages.length > 0 && (
+            {visibility.languages && languages.length > 0 && (
               <section>
-                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">
-                  Languages
-                </h2>
+                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">Languages</h2>
                 <div className="space-y-1">
                   {languages.map((lang) => (
                     <div key={lang.id} className="flex justify-between text-xs">
@@ -153,6 +142,24 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
             )}
           </div>
         </div>
+
+        {/* Certificates */}
+        {visibility.certificates && certificates && certificates.length > 0 && (
+          <section className="mt-10">
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4 text-center">Certifications & Credentials</h2>
+            <div className="flex flex-wrap justify-center gap-4">
+              {certificates.map((cert) => (
+                <div key={cert.id} className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 text-xs">
+                  <Award className="w-4 h-4 text-amber-500" />
+                  <div>
+                    <span className="font-medium text-slate-800">{cert.name}</span>
+                    <span className="text-slate-500 ml-2">{cert.issuer}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

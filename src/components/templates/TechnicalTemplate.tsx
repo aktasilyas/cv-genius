@@ -1,11 +1,12 @@
 import { CVData } from '@/types/cv';
+import { Award } from 'lucide-react';
 
 interface TechnicalTemplateProps {
   data: CVData;
 }
 
 const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
-  const { personalInfo, summary, experience, education, skills, languages } = data;
+  const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
 
   const formatDate = (date: string) => {
     if (!date) return '';
@@ -22,6 +23,8 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
       default: return 3;
     }
   };
+
+  const visibility = sectionVisibility || { summary: true, experience: true, education: true, skills: true, languages: true, certificates: true };
 
   return (
     <div className="bg-white text-gray-900 p-8 min-h-[1123px] font-mono text-sm">
@@ -47,7 +50,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
       </header>
 
       {/* Summary */}
-      {summary && (
+      {visibility.summary && summary && (
         <section className="mb-6">
           <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-2">
             <span className="text-gray-400">&gt;</span> Summary
@@ -60,7 +63,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
         {/* Main Content */}
         <div className="col-span-2 space-y-6">
           {/* Experience */}
-          {experience.length > 0 && (
+          {visibility.experience && experience.length > 0 && (
             <section>
               <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                 <span className="text-gray-400">&gt;</span> Experience
@@ -87,7 +90,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
           )}
 
           {/* Education */}
-          {education.length > 0 && (
+          {visibility.education && education.length > 0 && (
             <section>
               <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                 <span className="text-gray-400">&gt;</span> Education
@@ -113,11 +116,9 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Technical Skills */}
-          {skills.length > 0 && (
+          {visibility.skills && skills.length > 0 && (
             <section className="bg-gray-900 text-white p-4 rounded-lg">
-              <h2 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-4">
-                // Tech Stack
-              </h2>
+              <h2 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-4">// Tech Stack</h2>
               <div className="space-y-3">
                 {skills.map((skill) => (
                   <div key={skill.id}>
@@ -129,9 +130,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
                         <div
                           key={level}
                           className={`h-1.5 flex-1 rounded ${
-                            level <= getSkillLevel(skill.level) 
-                              ? 'bg-blue-500' 
-                              : 'bg-gray-700'
+                            level <= getSkillLevel(skill.level) ? 'bg-blue-500' : 'bg-gray-700'
                           }`}
                         />
                       ))}
@@ -143,16 +142,32 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
           )}
 
           {/* Languages */}
-          {languages.length > 0 && (
+          {visibility.languages && languages.length > 0 && (
             <section className="bg-gray-100 p-4 rounded-lg">
-              <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">
-                // Languages
-              </h2>
+              <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">// Languages</h2>
               <div className="space-y-2">
                 {languages.map((lang) => (
                   <div key={lang.id} className="flex justify-between text-xs">
                     <span className="text-gray-700">{lang.name}</span>
                     <code className="text-blue-600">{lang.proficiency}</code>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Certificates */}
+          {visibility.certificates && certificates && certificates.length > 0 && (
+            <section className="bg-blue-50 p-4 rounded-lg">
+              <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">// Certs</h2>
+              <div className="space-y-2">
+                {certificates.map((cert) => (
+                  <div key={cert.id} className="flex items-start gap-2 text-xs">
+                    <Award className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">{cert.name}</p>
+                      <p className="text-gray-500">{cert.issuer}</p>
+                    </div>
                   </div>
                 ))}
               </div>
