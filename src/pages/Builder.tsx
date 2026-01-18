@@ -26,6 +26,7 @@ import MinimalTemplate from '@/components/templates/MinimalTemplate';
 import CreativeTemplate from '@/components/templates/CreativeTemplate';
 import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
 import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
+import AuthButton from '@/components/auth/AuthButton';
 import { Link } from 'react-router-dom';
 
 const steps = [
@@ -125,6 +126,8 @@ const BuilderContent = () => {
               </Button>
             </div>
 
+            <AuthButton />
+            
             <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
               <Settings className="w-5 h-5" />
             </Button>
