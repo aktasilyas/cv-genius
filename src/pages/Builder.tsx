@@ -221,6 +221,20 @@ const BuilderContent = () => {
           </div>
         ) : (
           <>
+            {/* Template Selector - More Prominent */}
+            <div className="mb-8 p-6 card-elevated">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Layers className="w-5 h-5 text-primary" />
+                    {t('template.choose') || 'Choose Template'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">{t('template.chooseDesc') || 'Select a template that best fits your style'}</p>
+                </div>
+              </div>
+              <TemplateSelector compact />
+            </div>
+
             {/* Progress Steps */}
             <div className="mb-8">
               <div className="flex items-center justify-between max-w-3xl mx-auto overflow-x-auto pb-2">
@@ -281,12 +295,6 @@ const BuilderContent = () => {
                       </Button>
                     )}
                   </div>
-                </div>
-
-                {/* Template Selector */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-4">{t('template.choose') || 'Choose Template'}</h3>
-                  <TemplateSelector compact />
                 </div>
               </div>
 

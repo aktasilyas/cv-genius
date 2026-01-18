@@ -198,6 +198,7 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Templates
     'template.choose': 'Choose Template',
+    'template.chooseDesc': 'Select a template that best fits your style',
     'template.modern': 'Modern',
     'template.modernDesc': 'Clean layout with teal accents and sidebar',
     'template.classic': 'Classic',
@@ -459,6 +460,7 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Templates
     'template.choose': 'Şablon Seçin',
+    'template.chooseDesc': 'Tarzınıza en uygun şablonu seçin',
     'template.modern': 'Modern',
     'template.modernDesc': 'Turkuaz vurgular ve kenar çubuğu ile temiz düzen',
     'template.classic': 'Klasik',

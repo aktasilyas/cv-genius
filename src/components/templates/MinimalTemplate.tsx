@@ -1,5 +1,6 @@
 import { CVData } from '@/types/cv';
 import { Award } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 interface MinimalTemplateProps {
   data: CVData;
@@ -7,6 +8,7 @@ interface MinimalTemplateProps {
 
 const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
+  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';
@@ -50,18 +52,18 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data }) => {
       {/* Experience */}
       {visibility.experience && experience.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Experience</h2>
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.experience')}</h2>
           <div className="space-y-6">
             {experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex justify-between items-baseline mb-1">
                   <div>
                     <span className="font-medium text-gray-900">{exp.position || 'Position'}</span>
-                    <span className="text-gray-400 mx-2">at</span>
+                    <span className="text-gray-400 mx-2">{language === 'tr' ? '-' : 'at'}</span>
                     <span className="text-gray-700">{exp.company || 'Company'}</span>
                   </div>
                   <span className="text-gray-400 text-xs">
-                    {formatDate(exp.startDate)} – {exp.current ? 'Present' : formatDate(exp.endDate)}
+                    {formatDate(exp.startDate)} – {exp.current ? t('cv.present') : formatDate(exp.endDate)}
                   </span>
                 </div>
                 {exp.description && (
@@ -76,13 +78,13 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data }) => {
       {/* Education */}
       {visibility.education && education.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Education</h2>
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.education')}</h2>
           <div className="space-y-4">
             {education.map((edu) => (
               <div key={edu.id} className="flex justify-between items-baseline">
                 <div>
                   <span className="font-medium text-gray-900">{edu.degree}</span>
-                  <span className="text-gray-400 mx-1">in</span>
+                  <span className="text-gray-400 mx-1">{language === 'tr' ? '-' : 'in'}</span>
                   <span className="text-gray-700">{edu.field}</span>
                   <span className="text-gray-400 mx-2">—</span>
                   <span className="text-gray-600">{edu.institution}</span>
@@ -99,7 +101,7 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data }) => {
         {/* Skills */}
         {visibility.skills && skills.length > 0 && (
           <section>
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Skills</h2>
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.skills')}</h2>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill, index) => (
                 <span key={skill.id} className="text-gray-700 text-xs">
@@ -113,7 +115,7 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data }) => {
         {/* Languages */}
         {visibility.languages && languages.length > 0 && (
           <section>
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Languages</h2>
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.languages')}</h2>
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {languages.map((lang) => (
                 <span key={lang.id} className="text-gray-700 text-xs">
@@ -128,7 +130,7 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data }) => {
       {/* Certificates */}
       {visibility.certificates && certificates && certificates.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Certificates</h2>
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.certificates')}</h2>
           <div className="flex flex-wrap gap-4">
             {certificates.map((cert) => (
               <div key={cert.id} className="flex items-center gap-2 text-xs">

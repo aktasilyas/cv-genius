@@ -1,5 +1,6 @@
 import { CVData } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 interface ExecutiveTemplateProps {
   data: CVData;
@@ -7,11 +8,14 @@ interface ExecutiveTemplateProps {
 
 const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
+  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';
     const [year, month] = date.split('-');
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = language === 'tr' 
+      ? ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+      : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
 
@@ -62,7 +66,7 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
         {/* Executive Summary */}
         {visibility.summary && summary && (
           <section className="mb-10 text-center">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">Executive Summary</h2>
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">{t('cv.summary')}</h2>
             <p className="text-gray-600 leading-relaxed italic">{summary}</p>
           </section>
         )}
@@ -72,7 +76,7 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
         {/* Experience */}
         {visibility.experience && experience.length > 0 && (
           <section className="mb-10">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-6 text-center">Professional Experience</h2>
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-6 text-center">{t('cv.experience')}</h2>
             <div className="space-y-6">
               {experience.map((exp) => (
                 <div key={exp.id} className="border-l-2 border-amber-500 pl-6">
@@ -82,7 +86,7 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
                       <p className="text-amber-600">{exp.company || 'Company'}</p>
                     </div>
                     <span className="text-slate-500 text-xs">
-                      {formatDate(exp.startDate)} — {exp.current ? 'Present' : formatDate(exp.endDate)}
+                      {formatDate(exp.startDate)} — {exp.current ? t('cv.present') : formatDate(exp.endDate)}
                     </span>
                   </div>
                   {exp.description && (
@@ -98,7 +102,7 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
           {/* Education */}
           {visibility.education && education.length > 0 && (
             <section>
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">Education</h2>
+              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">{t('cv.education')}</h2>
               <div className="space-y-4">
                 {education.map((edu) => (
                   <div key={edu.id}>
@@ -115,7 +119,7 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
             {/* Core Competencies */}
             {visibility.skills && skills.length > 0 && (
               <section>
-                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">Core Competencies</h2>
+                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">{t('cv.skills')}</h2>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill) => (
                     <span key={skill.id} className="px-3 py-1 bg-slate-100 text-slate-700 text-xs border border-slate-200">
@@ -129,7 +133,7 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
             {/* Languages */}
             {visibility.languages && languages.length > 0 && (
               <section>
-                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">Languages</h2>
+                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4">{t('cv.languages')}</h2>
                 <div className="space-y-1">
                   {languages.map((lang) => (
                     <div key={lang.id} className="flex justify-between text-xs">
@@ -146,7 +150,7 @@ const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
         {/* Certificates */}
         {visibility.certificates && certificates && certificates.length > 0 && (
           <section className="mt-10">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4 text-center">Certifications & Credentials</h2>
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.3em] mb-4 text-center">{t('cv.certificates')}</h2>
             <div className="flex flex-wrap justify-center gap-4">
               {certificates.map((cert) => (
                 <div key={cert.id} className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 text-xs">

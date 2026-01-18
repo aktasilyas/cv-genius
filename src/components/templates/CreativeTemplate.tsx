@@ -1,5 +1,6 @@
 import { CVData } from '@/types/cv';
 import { Award } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 interface CreativeTemplateProps {
   data: CVData;
@@ -7,11 +8,14 @@ interface CreativeTemplateProps {
 
 const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
+  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';
     const [year, month] = date.split('-');
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = language === 'tr' 
+      ? ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
 
@@ -42,7 +46,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
           {/* Skills */}
           {visibility.skills && skills.length > 0 && (
             <section className="mb-8">
-              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">Skills</h2>
+              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">{t('cv.skills')}</h2>
               <div className="space-y-3">
                 {skills.map((skill) => (
                   <div key={skill.id}>
@@ -69,7 +73,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
           {/* Languages */}
           {visibility.languages && languages.length > 0 && (
             <section className="mb-8">
-              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">Languages</h2>
+              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">{t('cv.languages')}</h2>
               <div className="space-y-2">
                 {languages.map((lang) => (
                   <div key={lang.id} className="flex justify-between text-xs">
@@ -84,7 +88,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
           {/* Education */}
           {visibility.education && education.length > 0 && (
             <section className="mb-8">
-              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">Education</h2>
+              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">{t('cv.education')}</h2>
               <div className="space-y-4">
                 {education.map((edu) => (
                   <div key={edu.id} className="text-xs">
@@ -101,7 +105,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
           {/* Certificates */}
           {visibility.certificates && certificates && certificates.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">Certificates</h2>
+              <h2 className="text-lg font-bold text-pink-400 mb-4 uppercase tracking-wider">{t('cv.certificates')}</h2>
               <div className="space-y-3">
                 {certificates.map((cert) => (
                   <div key={cert.id} className="text-xs">
@@ -124,7 +128,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
           {/* Summary */}
           {visibility.summary && summary && (
             <section className="mb-8">
-              <h2 className="text-lg font-bold text-purple-600 mb-3 uppercase tracking-wider">About Me</h2>
+              <h2 className="text-lg font-bold text-purple-600 mb-3 uppercase tracking-wider">{t('cv.summary')}</h2>
               <p className="text-gray-700 leading-relaxed">{summary}</p>
             </section>
           )}
@@ -132,7 +136,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
           {/* Experience */}
           {visibility.experience && experience.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-purple-600 mb-4 uppercase tracking-wider">Experience</h2>
+              <h2 className="text-lg font-bold text-purple-600 mb-4 uppercase tracking-wider">{t('cv.experience')}</h2>
               <div className="space-y-6">
                 {experience.map((exp) => (
                   <div key={exp.id} className="relative pl-6 border-l-2 border-purple-200">
@@ -143,7 +147,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => {
                         <p className="text-purple-600 font-medium">{exp.company || 'Company'}</p>
                       </div>
                       <span className="text-gray-500 text-xs bg-gray-100 px-2 py-1 rounded">
-                        {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
+                        {formatDate(exp.startDate)} - {exp.current ? t('cv.present') : formatDate(exp.endDate)}
                       </span>
                     </div>
                     {exp.description && (
