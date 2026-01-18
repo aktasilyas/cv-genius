@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion';
 import { Plus, Trash2 } from 'lucide-react';
 import { useCVContext } from '@/context/CVContext';
+import { useSettings } from '@/context/SettingsContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
 const EducationStep = () => {
   const { cvData, addEducation, updateEducation, removeEducation } = useCVContext();
+  const { t } = useSettings();
 
   return (
     <motion.div
@@ -17,20 +19,26 @@ const EducationStep = () => {
     >
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-display font-semibold mb-2">Education</h2>
-          <p className="text-muted-foreground">Add your educational background</p>
+          <h2 className="text-2xl font-display font-semibold mb-2">
+            {t('builder.education') || 'Education'}
+          </h2>
+          <p className="text-muted-foreground">
+            {t('builder.educationDesc') || 'Add your educational background'}
+          </p>
         </div>
         <Button variant="outline" onClick={addEducation} className="gap-2">
           <Plus className="w-4 h-4" />
-          Add Education
+          {t('btn.addEducation') || 'Add Education'}
         </Button>
       </div>
 
       {cvData.education.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
-          <p className="text-muted-foreground mb-4">No education added yet</p>
+          <p className="text-muted-foreground mb-4">
+            {t('empty.education') || 'No education added yet'}
+          </p>
           <Button variant="accent" onClick={addEducation}>
-            Add Your Education
+            {t('empty.addFirstEducation') || 'Add Your Education'}
           </Button>
         </div>
       ) : (
@@ -43,7 +51,9 @@ const EducationStep = () => {
               className="card-elevated p-6 space-y-4"
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Education {index + 1}</h3>
+                <h3 className="font-semibold">
+                  {t('builder.education') || 'Education'} {index + 1}
+                </h3>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -56,7 +66,7 @@ const EducationStep = () => {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <Label>Institution</Label>
+                  <Label>{t('field.institution') || 'Institution'}</Label>
                   <Input
                     placeholder="Massachusetts Institute of Technology"
                     value={edu.institution}
@@ -65,7 +75,7 @@ const EducationStep = () => {
                   />
                 </div>
                 <div>
-                  <Label>Degree</Label>
+                  <Label>{t('field.degree') || 'Degree'}</Label>
                   <Input
                     placeholder="Bachelor of Science"
                     value={edu.degree}
@@ -74,7 +84,7 @@ const EducationStep = () => {
                   />
                 </div>
                 <div>
-                  <Label>Field of Study</Label>
+                  <Label>{t('field.fieldOfStudy') || 'Field of Study'}</Label>
                   <Input
                     placeholder="Computer Science"
                     value={edu.field}
@@ -83,7 +93,7 @@ const EducationStep = () => {
                   />
                 </div>
                 <div>
-                  <Label>Start Date</Label>
+                  <Label>{t('field.startDate') || 'Start Date'}</Label>
                   <Input
                     type="month"
                     value={edu.startDate}
@@ -92,7 +102,7 @@ const EducationStep = () => {
                   />
                 </div>
                 <div>
-                  <Label>End Date</Label>
+                  <Label>{t('field.endDate') || 'End Date'}</Label>
                   <Input
                     type="month"
                     value={edu.endDate}
@@ -101,7 +111,7 @@ const EducationStep = () => {
                   />
                 </div>
                 <div>
-                  <Label>GPA (Optional)</Label>
+                  <Label>{t('field.gpa') || 'GPA (Optional)'}</Label>
                   <Input
                     placeholder="3.8 / 4.0"
                     value={edu.gpa || ''}

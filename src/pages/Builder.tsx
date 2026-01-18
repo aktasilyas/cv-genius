@@ -29,14 +29,14 @@ import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
 import AuthButton from '@/components/auth/AuthButton';
 import { Link } from 'react-router-dom';
 
-const steps = [
-  { id: 0, title: 'Personal Info', component: PersonalInfoStep },
-  { id: 1, title: 'Experience', component: ExperienceStep },
-  { id: 2, title: 'Education', component: EducationStep },
-  { id: 3, title: 'Skills', component: SkillsStep },
-  { id: 4, title: 'Languages', component: LanguagesStep },
-  { id: 5, title: 'Certificates', component: CertificatesStep },
-  { id: 6, title: 'Summary', component: SummaryStep },
+const getSteps = (t: (key: string) => string) => [
+  { id: 0, titleKey: 'builder.personalInfo', component: PersonalInfoStep },
+  { id: 1, titleKey: 'builder.experience', component: ExperienceStep },
+  { id: 2, titleKey: 'builder.education', component: EducationStep },
+  { id: 3, titleKey: 'builder.skills', component: SkillsStep },
+  { id: 4, titleKey: 'builder.languages', component: LanguagesStep },
+  { id: 5, titleKey: 'builder.certificates', component: CertificatesStep },
+  { id: 6, titleKey: 'builder.summary', component: SummaryStep },
 ];
 
 const BuilderContent = () => {
@@ -47,6 +47,7 @@ const BuilderContent = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [rightPanel, setRightPanel] = useState<'ai' | 'job' | 'sections' | 'history'>('ai');
 
+  const steps = getSteps(t);
   const CurrentStepComponent = steps[currentStep].component;
 
   const getTemplateComponent = () => {
@@ -170,7 +171,7 @@ const BuilderContent = () => {
                     <span className={`text-xs mt-2 hidden sm:block ${
                       currentStep === step.id ? 'text-foreground font-medium' : 'text-muted-foreground'
                     }`}>
-                      {step.title}
+                      {t(step.titleKey) || step.titleKey.split('.')[1]}
                     </span>
                   </button>
                 ))}

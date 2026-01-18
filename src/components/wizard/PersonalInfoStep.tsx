@@ -1,26 +1,28 @@
 import { motion } from 'framer-motion';
 import { useCVContext } from '@/context/CVContext';
+import { useSettings } from '@/context/SettingsContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const PersonalInfoStep = () => {
   const { cvData, updatePersonalInfo } = useCVContext();
+  const { t } = useSettings();
   const { personalInfo } = cvData;
 
   const fields: Array<{
     key: keyof typeof personalInfo;
-    label: string;
+    labelKey: string;
     placeholder: string;
     required?: boolean;
     type?: string;
   }> = [
-    { key: 'fullName', label: 'Full Name', placeholder: 'John Doe', required: true },
-    { key: 'title', label: 'Professional Title', placeholder: 'Senior Software Engineer', required: true },
-    { key: 'email', label: 'Email', placeholder: 'john@example.com', type: 'email', required: true },
-    { key: 'phone', label: 'Phone', placeholder: '+1 234 567 890', type: 'tel', required: true },
-    { key: 'location', label: 'Location', placeholder: 'New York, NY', required: true },
-    { key: 'linkedin', label: 'LinkedIn URL', placeholder: 'linkedin.com/in/johndoe' },
-    { key: 'website', label: 'Personal Website', placeholder: 'johndoe.com' },
+    { key: 'fullName', labelKey: 'field.fullName', placeholder: 'John Doe', required: true },
+    { key: 'title', labelKey: 'field.title', placeholder: 'Senior Software Engineer', required: true },
+    { key: 'email', labelKey: 'field.email', placeholder: 'john@example.com', type: 'email', required: true },
+    { key: 'phone', labelKey: 'field.phone', placeholder: '+1 234 567 890', type: 'tel', required: true },
+    { key: 'location', labelKey: 'field.location', placeholder: 'New York, NY', required: true },
+    { key: 'linkedin', labelKey: 'field.linkedin', placeholder: 'linkedin.com/in/johndoe' },
+    { key: 'website', labelKey: 'field.website', placeholder: 'johndoe.com' },
   ];
 
   return (
@@ -31,15 +33,19 @@ const PersonalInfoStep = () => {
       className="space-y-6"
     >
       <div>
-        <h2 className="text-2xl font-display font-semibold mb-2">Personal Information</h2>
-        <p className="text-muted-foreground">Let's start with your basic details</p>
+        <h2 className="text-2xl font-display font-semibold mb-2">
+          {t('builder.personalInfo') || 'Personal Information'}
+        </h2>
+        <p className="text-muted-foreground">
+          {t('builder.personalInfoDesc') || "Let's start with your basic details"}
+        </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {fields.map((field) => (
           <div key={field.key} className={field.key === 'fullName' || field.key === 'title' ? 'md:col-span-2' : ''}>
             <Label htmlFor={field.key} className="text-sm font-medium">
-              {field.label}
+              {t(field.labelKey) || field.labelKey.split('.')[1]}
               {field.required && <span className="text-destructive ml-1">*</span>}
             </Label>
             <Input
