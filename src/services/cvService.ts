@@ -77,9 +77,9 @@ export const cvService = {
   // Update an existing CV
   async updateCV(id: string, updates: Partial<{ title: string; cv_data: CVData; selected_template: CVTemplate }>): Promise<SavedCV> {
     const updateData: Record<string, unknown> = {};
-    if (updates.title) updateData.title = updates.title;
-    if (updates.cv_data) updateData.cv_data = updates.cv_data as unknown as Json;
-    if (updates.selected_template) updateData.selected_template = updates.selected_template;
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.cv_data !== undefined) updateData.cv_data = updates.cv_data as unknown as Json;
+    if (updates.selected_template !== undefined) updateData.selected_template = updates.selected_template;
 
     const { data, error } = await supabase
       .from('cvs')
