@@ -1,5 +1,6 @@
 import { CVData } from '@/types/cv';
 import { Award } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 interface TechnicalTemplateProps {
   data: CVData;
@@ -7,6 +8,7 @@ interface TechnicalTemplateProps {
 
 const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
+  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';
@@ -53,7 +55,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
       {visibility.summary && summary && (
         <section className="mb-6">
           <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-2">
-            <span className="text-gray-400">&gt;</span> Summary
+            <span className="text-gray-400">&gt;</span> {t('cv.summary')}
           </h2>
           <p className="text-gray-700 leading-relaxed pl-4 border-l-2 border-gray-200">{summary}</p>
         </section>
@@ -66,7 +68,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
           {visibility.experience && experience.length > 0 && (
             <section>
               <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <span className="text-gray-400">&gt;</span> Experience
+                <span className="text-gray-400">&gt;</span> {t('cv.experience')}
               </h2>
               <div className="space-y-4">
                 {experience.map((exp) => (
@@ -77,7 +79,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
                         <p className="text-blue-600 text-xs">{exp.company || 'Company'}</p>
                       </div>
                       <code className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded">
-                        {formatDate(exp.startDate)} → {exp.current ? 'present' : formatDate(exp.endDate)}
+                        {formatDate(exp.startDate)} → {exp.current ? t('cv.present').toLowerCase() : formatDate(exp.endDate)}
                       </code>
                     </div>
                     {exp.description && (
@@ -93,7 +95,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
           {visibility.education && education.length > 0 && (
             <section>
               <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <span className="text-gray-400">&gt;</span> Education
+                <span className="text-gray-400">&gt;</span> {t('cv.education')}
               </h2>
               <div className="space-y-3">
                 {education.map((edu) => (
@@ -118,7 +120,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
           {/* Technical Skills */}
           {visibility.skills && skills.length > 0 && (
             <section className="bg-gray-900 text-white p-4 rounded-lg">
-              <h2 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-4">// Tech Stack</h2>
+              <h2 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-4">// {t('cv.skills')}</h2>
               <div className="space-y-3">
                 {skills.map((skill) => (
                   <div key={skill.id}>
@@ -144,7 +146,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
           {/* Languages */}
           {visibility.languages && languages.length > 0 && (
             <section className="bg-gray-100 p-4 rounded-lg">
-              <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">// Languages</h2>
+              <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">// {t('cv.languages')}</h2>
               <div className="space-y-2">
                 {languages.map((lang) => (
                   <div key={lang.id} className="flex justify-between text-xs">
@@ -159,7 +161,7 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
           {/* Certificates */}
           {visibility.certificates && certificates && certificates.length > 0 && (
             <section className="bg-blue-50 p-4 rounded-lg">
-              <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">// Certs</h2>
+              <h2 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">// {t('cv.certificates')}</h2>
               <div className="space-y-2">
                 {certificates.map((cert) => (
                   <div key={cert.id} className="flex items-start gap-2 text-xs">

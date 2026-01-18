@@ -1,5 +1,6 @@
 import { CVData } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 interface ClassicTemplateProps {
   data: CVData;
@@ -7,16 +8,18 @@ interface ClassicTemplateProps {
 
 const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility, sectionOrder } = data;
+  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';
     const [year, month] = date.split('-');
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = language === 'tr' 
+      ? ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+      : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
 
   const visibility = sectionVisibility || { summary: true, experience: true, education: true, skills: true, languages: true, certificates: true };
-  const sortedSections = [...(sectionOrder || [])].sort((a, b) => a.order - b.order);
 
   return (
     <div className="bg-white text-gray-900 p-8 min-h-[1123px] font-serif text-sm">
@@ -65,7 +68,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => {
       {/* Summary */}
       {visibility.summary && summary && (
         <section className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">Profile</h2>
+          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.summary')}</h2>
           <p className="text-gray-700 leading-relaxed">{summary}</p>
         </section>
       )}
@@ -73,14 +76,14 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => {
       {/* Experience */}
       {visibility.experience && experience.length > 0 && (
         <section className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">Professional Experience</h2>
+          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.experience')}</h2>
           <div className="space-y-4">
             {experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex justify-between items-baseline mb-1">
                   <h3 className="font-bold text-gray-900">{exp.position || 'Position'}</h3>
                   <span className="text-gray-500 text-xs italic">
-                    {formatDate(exp.startDate)} — {exp.current ? 'Present' : formatDate(exp.endDate)}
+                    {formatDate(exp.startDate)} — {exp.current ? t('cv.present') : formatDate(exp.endDate)}
                   </span>
                 </div>
                 <p className="text-gray-600 italic mb-2">{exp.company || 'Company'}</p>
@@ -96,7 +99,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => {
       {/* Education */}
       {visibility.education && education.length > 0 && (
         <section className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">Education</h2>
+          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.education')}</h2>
           <div className="space-y-3">
             {education.map((edu) => (
               <div key={edu.id}>
@@ -120,7 +123,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => {
         {/* Skills */}
         {visibility.skills && skills.length > 0 && (
           <section>
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">Skills</h2>
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.skills')}</h2>
             <ul className="list-disc list-inside text-gray-700 text-xs space-y-1">
               {skills.map((skill) => (
                 <li key={skill.id}>
@@ -134,7 +137,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => {
         {/* Languages */}
         {visibility.languages && languages.length > 0 && (
           <section>
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">Languages</h2>
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.languages')}</h2>
             <ul className="list-disc list-inside text-gray-700 text-xs space-y-1">
               {languages.map((lang) => (
                 <li key={lang.id}>
@@ -149,7 +152,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => {
       {/* Certificates */}
       {visibility.certificates && certificates && certificates.length > 0 && (
         <section className="mt-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">Certifications</h2>
+          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.certificates')}</h2>
           <div className="grid grid-cols-2 gap-3">
             {certificates.map((cert) => (
               <div key={cert.id} className="flex items-start gap-2 text-xs">

@@ -1,5 +1,6 @@
 import { CVData, SectionOrder } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 interface ModernTemplateProps {
   data: CVData;
@@ -7,11 +8,14 @@ interface ModernTemplateProps {
 
 const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility, sectionOrder } = data;
+  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';
     const [year, month] = date.split('-');
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = language === 'tr' 
+      ? ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
 
@@ -27,7 +31,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
         return (
           <section key="summary">
             <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
-              Professional Summary
+              {t('cv.summary')}
             </h2>
             <p className="text-gray-700 leading-relaxed">{summary}</p>
           </section>
@@ -38,7 +42,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
         return (
           <section key="experience">
             <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
-              Work Experience
+              {t('cv.experience')}
             </h2>
             <div className="space-y-4">
               {experience.map((exp) => (
@@ -49,7 +53,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
                       <p className="text-teal-600 font-medium">{exp.company || 'Company'}</p>
                     </div>
                     <span className="text-gray-500 text-xs">
-                      {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
+                      {formatDate(exp.startDate)} - {exp.current ? t('cv.present') : formatDate(exp.endDate)}
                     </span>
                   </div>
                   {exp.description && (
@@ -66,7 +70,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
         return (
           <section key="education">
             <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
-              Education
+              {t('cv.education')}
             </h2>
             <div className="space-y-3">
               {education.map((edu) => (
@@ -101,7 +105,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
         return (
           <section key="skills">
             <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
-              Skills
+              {t('cv.skills')}
             </h2>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill) => (
@@ -118,7 +122,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
         return (
           <section key="languages">
             <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
-              Languages
+              {t('cv.languages')}
             </h2>
             <div className="space-y-2">
               {languages.map((lang) => (
@@ -136,7 +140,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
         return (
           <section key="certificates">
             <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
-              Certificates
+              {t('cv.certificates')}
             </h2>
             <div className="space-y-2">
               {certificates.map((cert) => (
