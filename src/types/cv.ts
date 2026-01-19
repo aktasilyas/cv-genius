@@ -115,7 +115,7 @@ export interface JobMatch {
 
 export type CVTemplate = 'modern' | 'classic' | 'minimal' | 'creative' | 'executive' | 'technical';
 
-export type CVCreationMode = 'structured' | 'ai-text';
+export type CVCreationMode = 'structured' | 'ai-text' | 'linkedin';
 
 export const defaultSectionOrder: SectionOrder[] = [
   { id: 'summary', order: 0 },
