@@ -1,4 +1,4 @@
-import { CVData } from '@/types/cv';
+import { CVData, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
 import { Award } from 'lucide-react';
 import { Language } from '@/lib/translations';
 
@@ -6,9 +6,15 @@ interface MinimalTemplateProps {
   data: CVData;
   language?: Language;
   t?: (key: string) => string;
+  customization?: TemplateCustomization;
 }
 
-const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data, language = 'en', t = (key: string) => key }) => {
+const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ 
+  data, 
+  language = 'en', 
+  t = (key: string) => key,
+  customization = defaultTemplateCustomization
+}) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
 
   const formatDate = (date: string) => {
@@ -19,24 +25,58 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data, language = 'en'
 
   const visibility = sectionVisibility || { summary: true, experience: true, education: true, skills: true, languages: true, certificates: true };
 
+  // Style calculations
+  const fontFamilyMap: Record<string, string> = {
+    inter: "'Inter', sans-serif",
+    playfair: "'Playfair Display', serif",
+    roboto: "'Roboto', sans-serif",
+    opensans: "'Open Sans', sans-serif",
+    lato: "'Lato', sans-serif",
+    montserrat: "'Montserrat', sans-serif",
+  };
+
+  const fontSizeMap = {
+    small: { base: '12px', heading: '28px', section: '10px' },
+    medium: { base: '14px', heading: '32px', section: '12px' },
+    large: { base: '16px', heading: '36px', section: '14px' },
+  };
+
+  const spacingMap = {
+    compact: '24px',
+    normal: '32px',
+    relaxed: '40px',
+  };
+
   return (
-    <div className="bg-white text-gray-900 p-10 min-h-[1123px] font-sans text-sm">
+    <div 
+      className="min-h-[1123px]"
+      style={{
+        fontFamily: fontFamilyMap[customization.fontFamily],
+        fontSize: fontSizeMap[customization.fontSize].base,
+        backgroundColor: customization.backgroundColor,
+        color: customization.textColor,
+        padding: spacingMap[customization.spacing],
+      }}
+    >
       {/* Header */}
-      <header className="mb-8">
-        <h1 className="text-4xl font-light text-gray-900 tracking-tight mb-1">
+      <header style={{ marginBottom: spacingMap[customization.spacing] }}>
+        <h1 
+          className="font-light tracking-tight mb-1"
+          style={{ fontSize: fontSizeMap[customization.fontSize].heading, color: customization.textColor }}
+        >
           {personalInfo.fullName || 'Your Name'}
         </h1>
-        <p className="text-lg text-gray-500 mb-4">
+        <p className="mb-4" style={{ fontSize: '16px', color: `${customization.textColor}80` }}>
           {personalInfo.title || 'Professional Title'}
         </p>
-        <div className="flex flex-wrap gap-4 text-gray-500 text-xs">
+        <div className="flex flex-wrap gap-4 text-xs" style={{ color: `${customization.textColor}80` }}>
           {personalInfo.email && <span>{personalInfo.email}</span>}
           {personalInfo.phone && <span>•</span>}
           {personalInfo.phone && <span>{personalInfo.phone}</span>}
           {personalInfo.location && <span>•</span>}
           {personalInfo.location && <span>{personalInfo.location}</span>}
         </div>
-        <div className="flex gap-4 text-gray-500 text-xs mt-1">
+        <div className="flex gap-4 text-xs mt-1" style={{ color: `${customization.textColor}80` }}>
           {personalInfo.linkedin && <span>{personalInfo.linkedin}</span>}
           {personalInfo.website && <span>•</span>}
           {personalInfo.website && <span>{personalInfo.website}</span>}
@@ -45,30 +85,44 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data, language = 'en'
 
       {/* Summary */}
       {visibility.summary && summary && (
-        <section className="mb-8">
-          <p className="text-gray-700 leading-relaxed border-l-2 border-gray-200 pl-4">{summary}</p>
+        <section style={{ marginBottom: spacingMap[customization.spacing] }}>
+          <p 
+            className="leading-relaxed pl-4"
+            style={{ 
+              color: `${customization.textColor}cc`,
+              borderLeftWidth: '2px',
+              borderColor: `${customization.primaryColor}40`
+            }}
+          >
+            {summary}
+          </p>
         </section>
       )}
 
       {/* Experience */}
       {visibility.experience && experience.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.experience')}</h2>
+        <section style={{ marginBottom: spacingMap[customization.spacing] }}>
+          <h2 
+            className="font-bold uppercase tracking-widest mb-4"
+            style={{ fontSize: fontSizeMap[customization.fontSize].section, color: `${customization.textColor}80` }}
+          >
+            {t('cv.experience')}
+          </h2>
           <div className="space-y-6">
             {experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex justify-between items-baseline mb-1">
                   <div>
-                    <span className="font-medium text-gray-900">{exp.position || 'Position'}</span>
-                    <span className="text-gray-400 mx-2">{language === 'tr' ? '-' : 'at'}</span>
-                    <span className="text-gray-700">{exp.company || 'Company'}</span>
+                    <span className="font-medium" style={{ color: customization.textColor }}>{exp.position || 'Position'}</span>
+                    <span className="mx-2" style={{ color: `${customization.textColor}60` }}>{language === 'tr' ? '-' : 'at'}</span>
+                    <span style={{ color: customization.primaryColor }}>{exp.company || 'Company'}</span>
                   </div>
-                  <span className="text-gray-400 text-xs">
+                  <span className="text-xs" style={{ color: `${customization.textColor}60` }}>
                     {formatDate(exp.startDate)} – {exp.current ? t('cv.present') : formatDate(exp.endDate)}
                   </span>
                 </div>
                 {exp.description && (
-                  <p className="text-gray-600 text-xs mt-2 whitespace-pre-line">{exp.description}</p>
+                  <p className="text-xs mt-2 whitespace-pre-line" style={{ color: `${customization.textColor}99` }}>{exp.description}</p>
                 )}
               </div>
             ))}
@@ -78,20 +132,25 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data, language = 'en'
 
       {/* Education */}
       {visibility.education && education.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.education')}</h2>
+        <section style={{ marginBottom: spacingMap[customization.spacing] }}>
+          <h2 
+            className="font-bold uppercase tracking-widest mb-4"
+            style={{ fontSize: fontSizeMap[customization.fontSize].section, color: `${customization.textColor}80` }}
+          >
+            {t('cv.education')}
+          </h2>
           <div className="space-y-4">
             {education.map((edu) => (
               <div key={edu.id} className="flex justify-between items-baseline">
                 <div>
-                  <span className="font-medium text-gray-900">{edu.degree}</span>
-                  <span className="text-gray-400 mx-1">{language === 'tr' ? '-' : 'in'}</span>
-                  <span className="text-gray-700">{edu.field}</span>
-                  <span className="text-gray-400 mx-2">—</span>
-                  <span className="text-gray-600">{edu.institution}</span>
-                  {edu.gpa && <span className="text-gray-400 ml-2">({edu.gpa})</span>}
+                  <span className="font-medium" style={{ color: customization.textColor }}>{edu.degree}</span>
+                  <span className="mx-1" style={{ color: `${customization.textColor}60` }}>{language === 'tr' ? '-' : 'in'}</span>
+                  <span style={{ color: customization.primaryColor }}>{edu.field}</span>
+                  <span className="mx-2" style={{ color: `${customization.textColor}60` }}>—</span>
+                  <span style={{ color: `${customization.textColor}99` }}>{edu.institution}</span>
+                  {edu.gpa && <span className="ml-2" style={{ color: `${customization.textColor}60` }}>({edu.gpa})</span>}
                 </div>
-                <span className="text-gray-400 text-xs">{formatDate(edu.endDate)}</span>
+                <span className="text-xs" style={{ color: `${customization.textColor}60` }}>{formatDate(edu.endDate)}</span>
               </div>
             ))}
           </div>
@@ -102,10 +161,15 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data, language = 'en'
         {/* Skills */}
         {visibility.skills && skills.length > 0 && (
           <section>
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.skills')}</h2>
+            <h2 
+              className="font-bold uppercase tracking-widest mb-4"
+              style={{ fontSize: fontSizeMap[customization.fontSize].section, color: `${customization.textColor}80` }}
+            >
+              {t('cv.skills')}
+            </h2>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill, index) => (
-                <span key={skill.id} className="text-gray-700 text-xs">
+                <span key={skill.id} className="text-xs" style={{ color: customization.primaryColor }}>
                   {skill.name}{index < skills.length - 1 ? ' •' : ''}
                 </span>
               ))}
@@ -116,11 +180,16 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data, language = 'en'
         {/* Languages */}
         {visibility.languages && languages.length > 0 && (
           <section>
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.languages')}</h2>
+            <h2 
+              className="font-bold uppercase tracking-widest mb-4"
+              style={{ fontSize: fontSizeMap[customization.fontSize].section, color: `${customization.textColor}80` }}
+            >
+              {t('cv.languages')}
+            </h2>
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {languages.map((lang) => (
-                <span key={lang.id} className="text-gray-700 text-xs">
-                  {lang.name} <span className="text-gray-400">({lang.proficiency})</span>
+                <span key={lang.id} className="text-xs" style={{ color: customization.textColor }}>
+                  {lang.name} <span style={{ color: `${customization.textColor}60` }}>({lang.proficiency})</span>
                 </span>
               ))}
             </div>
@@ -130,14 +199,19 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data, language = 'en'
 
       {/* Certificates */}
       {visibility.certificates && certificates && certificates.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('cv.certificates')}</h2>
+        <section style={{ marginTop: spacingMap[customization.spacing] }}>
+          <h2 
+            className="font-bold uppercase tracking-widest mb-4"
+            style={{ fontSize: fontSizeMap[customization.fontSize].section, color: `${customization.textColor}80` }}
+          >
+            {t('cv.certificates')}
+          </h2>
           <div className="flex flex-wrap gap-4">
             {certificates.map((cert) => (
               <div key={cert.id} className="flex items-center gap-2 text-xs">
-                <Award className="w-3 h-3 text-gray-400" />
-                <span className="text-gray-700">{cert.name}</span>
-                <span className="text-gray-400">({cert.issuer})</span>
+                <Award className="w-3 h-3" style={{ color: customization.primaryColor }} />
+                <span style={{ color: customization.textColor }}>{cert.name}</span>
+                <span style={{ color: `${customization.textColor}60` }}>({cert.issuer})</span>
               </div>
             ))}
           </div>

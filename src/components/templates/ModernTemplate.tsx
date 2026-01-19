@@ -1,4 +1,4 @@
-import { CVData, SectionOrder } from '@/types/cv';
+import { CVData, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
 import { Language } from '@/lib/translations';
 
@@ -6,9 +6,15 @@ interface ModernTemplateProps {
   data: CVData;
   language?: Language;
   t?: (key: string) => string;
+  customization?: TemplateCustomization;
 }
 
-const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', t = (key: string) => key }) => {
+const ModernTemplate: React.FC<ModernTemplateProps> = ({ 
+  data, 
+  language = 'en', 
+  t = (key: string) => key,
+  customization = defaultTemplateCustomization
+}) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility, sectionOrder } = data;
 
   const formatDate = (date: string) => {
@@ -18,6 +24,56 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', 
       ? ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
       : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
+  };
+
+  // Style calculations based on customization
+  const fontFamilyMap: Record<string, string> = {
+    inter: "'Inter', sans-serif",
+    playfair: "'Playfair Display', serif",
+    roboto: "'Roboto', sans-serif",
+    opensans: "'Open Sans', sans-serif",
+    lato: "'Lato', sans-serif",
+    montserrat: "'Montserrat', sans-serif",
+  };
+
+  const fontSizeMap = {
+    small: { base: '12px', heading: '24px', subheading: '14px' },
+    medium: { base: '14px', heading: '28px', subheading: '16px' },
+    large: { base: '16px', heading: '32px', subheading: '18px' },
+  };
+
+  const spacingMap = {
+    compact: { section: '16px', item: '8px', padding: '24px' },
+    normal: { section: '24px', item: '12px', padding: '32px' },
+    relaxed: { section: '32px', item: '16px', padding: '40px' },
+  };
+
+  const borderMap = {
+    none: '0px',
+    subtle: '2px',
+    bold: '4px',
+  };
+
+  const styles = {
+    fontFamily: fontFamilyMap[customization.fontFamily],
+    fontSize: fontSizeMap[customization.fontSize].base,
+    backgroundColor: customization.backgroundColor,
+    color: customization.textColor,
+    padding: spacingMap[customization.spacing].padding,
+  };
+
+  const headingStyle = {
+    fontSize: fontSizeMap[customization.fontSize].heading,
+    color: customization.textColor,
+  };
+
+  const accentStyle = {
+    color: customization.primaryColor,
+  };
+
+  const borderStyle = {
+    borderBottomWidth: borderMap[customization.borderStyle],
+    borderColor: customization.primaryColor,
   };
 
   // Sort sections by order
@@ -30,35 +86,49 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', 
       case 'summary':
         if (!visibility.summary || !summary) return null;
         return (
-          <section key="summary">
-            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
+          <section key="summary" style={{ marginBottom: spacingMap[customization.spacing].section }}>
+            <h2 
+              className="font-bold pb-2 mb-3" 
+              style={{ 
+                fontSize: fontSizeMap[customization.fontSize].subheading,
+                borderBottomWidth: '1px',
+                borderColor: `${customization.primaryColor}40`
+              }}
+            >
               {t('cv.summary')}
             </h2>
-            <p className="text-gray-700 leading-relaxed">{summary}</p>
+            <p className="leading-relaxed" style={{ color: customization.textColor }}>{summary}</p>
           </section>
         );
 
       case 'experience':
         if (!visibility.experience || experience.length === 0) return null;
         return (
-          <section key="experience">
-            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
+          <section key="experience" style={{ marginBottom: spacingMap[customization.spacing].section }}>
+            <h2 
+              className="font-bold pb-2 mb-3"
+              style={{ 
+                fontSize: fontSizeMap[customization.fontSize].subheading,
+                borderBottomWidth: '1px',
+                borderColor: `${customization.primaryColor}40`
+              }}
+            >
               {t('cv.experience')}
             </h2>
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: spacingMap[customization.spacing].item }}>
               {experience.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex justify-between items-start mb-1">
                     <div>
-                      <h3 className="font-bold text-gray-900">{exp.position || 'Position'}</h3>
-                      <p className="text-teal-600 font-medium">{exp.company || 'Company'}</p>
+                      <h3 className="font-bold" style={{ color: customization.textColor }}>{exp.position || 'Position'}</h3>
+                      <p className="font-medium" style={accentStyle}>{exp.company || 'Company'}</p>
                     </div>
-                    <span className="text-gray-500 text-xs">
+                    <span className="text-xs" style={{ color: `${customization.textColor}80` }}>
                       {formatDate(exp.startDate)} - {exp.current ? t('cv.present') : formatDate(exp.endDate)}
                     </span>
                   </div>
                   {exp.description && (
-                    <p className="text-gray-700 text-xs mt-2 whitespace-pre-line">{exp.description}</p>
+                    <p className="text-xs mt-2 whitespace-pre-line" style={{ color: `${customization.textColor}cc` }}>{exp.description}</p>
                   )}
                 </div>
               ))}
@@ -69,23 +139,30 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', 
       case 'education':
         if (!visibility.education || education.length === 0) return null;
         return (
-          <section key="education">
-            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
+          <section key="education" style={{ marginBottom: spacingMap[customization.spacing].section }}>
+            <h2 
+              className="font-bold pb-2 mb-3"
+              style={{ 
+                fontSize: fontSizeMap[customization.fontSize].subheading,
+                borderBottomWidth: '1px',
+                borderColor: `${customization.primaryColor}40`
+              }}
+            >
               {t('cv.education')}
             </h2>
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: spacingMap[customization.spacing].item }}>
               {education.map((edu) => (
                 <div key={edu.id}>
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="font-bold text-gray-900">{edu.degree} in {edu.field}</h3>
-                      <p className="text-teal-600">{edu.institution}</p>
+                      <h3 className="font-bold" style={{ color: customization.textColor }}>{edu.degree} in {edu.field}</h3>
+                      <p style={accentStyle}>{edu.institution}</p>
                     </div>
-                    <span className="text-gray-500 text-xs">
+                    <span className="text-xs" style={{ color: `${customization.textColor}80` }}>
                       {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
                     </span>
                   </div>
-                  {edu.gpa && <p className="text-gray-600 text-xs mt-1">GPA: {edu.gpa}</p>}
+                  {edu.gpa && <p className="text-xs mt-1" style={{ color: `${customization.textColor}99` }}>GPA: {edu.gpa}</p>}
                 </div>
               ))}
             </div>
@@ -104,13 +181,27 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', 
       case 'skills':
         if (!visibility.skills || skills.length === 0) return null;
         return (
-          <section key="skills">
-            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
+          <section key="skills" style={{ marginBottom: spacingMap[customization.spacing].section }}>
+            <h2 
+              className="font-bold pb-2 mb-3"
+              style={{ 
+                fontSize: fontSizeMap[customization.fontSize].subheading,
+                borderBottomWidth: '1px',
+                borderColor: `${customization.primaryColor}40`
+              }}
+            >
               {t('cv.skills')}
             </h2>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill) => (
-                <span key={skill.id} className="px-2 py-1 bg-teal-50 text-teal-700 rounded text-xs">
+                <span 
+                  key={skill.id} 
+                  className="px-2 py-1 rounded text-xs"
+                  style={{ 
+                    backgroundColor: `${customization.primaryColor}15`,
+                    color: customization.primaryColor
+                  }}
+                >
                   {skill.name}
                 </span>
               ))}
@@ -121,15 +212,22 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', 
       case 'languages':
         if (!visibility.languages || languages.length === 0) return null;
         return (
-          <section key="languages">
-            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
+          <section key="languages" style={{ marginBottom: spacingMap[customization.spacing].section }}>
+            <h2 
+              className="font-bold pb-2 mb-3"
+              style={{ 
+                fontSize: fontSizeMap[customization.fontSize].subheading,
+                borderBottomWidth: '1px',
+                borderColor: `${customization.primaryColor}40`
+              }}
+            >
               {t('cv.languages')}
             </h2>
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {languages.map((lang) => (
                 <div key={lang.id} className="flex justify-between text-xs">
-                  <span className="text-gray-900">{lang.name}</span>
-                  <span className="text-gray-500 capitalize">{lang.proficiency}</span>
+                  <span style={{ color: customization.textColor }}>{lang.name}</span>
+                  <span className="capitalize" style={{ color: `${customization.textColor}80` }}>{lang.proficiency}</span>
                 </div>
               ))}
             </div>
@@ -139,19 +237,26 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', 
       case 'certificates':
         if (!visibility.certificates || !certificates || certificates.length === 0) return null;
         return (
-          <section key="certificates">
-            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-3">
+          <section key="certificates" style={{ marginBottom: spacingMap[customization.spacing].section }}>
+            <h2 
+              className="font-bold pb-2 mb-3"
+              style={{ 
+                fontSize: fontSizeMap[customization.fontSize].subheading,
+                borderBottomWidth: '1px',
+                borderColor: `${customization.primaryColor}40`
+              }}
+            >
               {t('cv.certificates')}
             </h2>
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {certificates.map((cert) => (
                 <div key={cert.id} className="text-xs">
                   <div className="flex items-start gap-1">
-                    <Award className="w-3 h-3 text-teal-600 mt-0.5 flex-shrink-0" />
+                    <Award className="w-3 h-3 mt-0.5 flex-shrink-0" style={{ color: customization.primaryColor }} />
                     <div>
-                      <p className="font-medium text-gray-900">{cert.name}</p>
-                      <p className="text-gray-500">{cert.issuer}</p>
-                      {cert.date && <p className="text-gray-400">{formatDate(cert.date)}</p>}
+                      <p className="font-medium" style={{ color: customization.textColor }}>{cert.name}</p>
+                      <p style={{ color: `${customization.textColor}80` }}>{cert.issuer}</p>
+                      {cert.date && <p style={{ color: `${customization.textColor}60` }}>{formatDate(cert.date)}</p>}
                     </div>
                   </div>
                 </div>
@@ -169,16 +274,22 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', 
   const sidebarSections = ['skills', 'languages', 'certificates'];
 
   return (
-    <div className="bg-white text-gray-900 p-8 min-h-[1123px] font-sans text-sm">
+    <div 
+      className="min-h-[1123px]"
+      style={styles}
+    >
       {/* Header */}
-      <header className="border-b-2 border-teal-500 pb-6 mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">
+      <header 
+        className="pb-6 mb-6"
+        style={borderStyle}
+      >
+        <h1 className="font-bold mb-1" style={headingStyle}>
           {personalInfo.fullName || 'Your Name'}
         </h1>
-        <p className="text-lg text-teal-600 font-medium mb-4">
+        <p className="font-medium mb-4" style={{ ...accentStyle, fontSize: fontSizeMap[customization.fontSize].subheading }}>
           {personalInfo.title || 'Professional Title'}
         </p>
-        <div className="flex flex-wrap gap-4 text-gray-600 text-xs">
+        <div className="flex flex-wrap gap-4 text-xs" style={{ color: `${customization.textColor}99` }}>
           {personalInfo.email && (
             <span className="flex items-center gap-1">
               <Mail className="w-3 h-3" />
@@ -214,14 +325,14 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', 
 
       <div className="grid grid-cols-3 gap-6">
         {/* Main Content */}
-        <div className="col-span-2 space-y-6">
+        <div className="col-span-2">
           {sortedSections
             .filter(s => mainSections.includes(s.id))
             .map(s => renderSection(s.id))}
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div>
           {sortedSections
             .filter(s => sidebarSections.includes(s.id))
             .map(s => renderSidebarSection(s.id))}

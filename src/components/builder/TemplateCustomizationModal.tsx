@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
 import { CVTemplate, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
@@ -76,7 +77,7 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
   };
 
   const renderTemplate = () => {
-    const props = { data: cvData, language, t };
+    const props = { data: cvData, language, t, customization: localCustomization };
     
     switch (templateId) {
       case 'modern': return <ModernTemplate {...props} />;
@@ -87,20 +88,6 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
       case 'technical': return <TechnicalTemplate {...props} />;
       default: return <ModernTemplate {...props} />;
     }
-  };
-
-  const getTemplateStyle = () => {
-    const fontSizeMap = { small: '0.875rem', medium: '1rem', large: '1.125rem' };
-    const spacingMap = { compact: '0.75rem', normal: '1rem', relaxed: '1.5rem' };
-    
-    return {
-      '--template-primary': localCustomization.primaryColor,
-      '--template-accent': localCustomization.accentColor,
-      '--template-text': localCustomization.textColor,
-      '--template-bg': localCustomization.backgroundColor,
-      fontSize: fontSizeMap[localCustomization.fontSize],
-      padding: spacingMap[localCustomization.spacing],
-    } as React.CSSProperties;
   };
 
   return (
@@ -115,9 +102,9 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
         
         <div className="flex flex-1 overflow-hidden">
           {/* Settings Panel */}
-          <div className="w-80 border-r bg-background overflow-y-auto">
-            <Tabs defaultValue="colors" className="w-full">
-              <TabsList className="w-full grid grid-cols-3 p-1 m-2">
+          <div className="w-80 border-r bg-background flex flex-col">
+            <Tabs defaultValue="colors" className="flex-1 flex flex-col">
+              <TabsList className="w-full grid grid-cols-3 p-1 m-2 flex-shrink-0">
                 <TabsTrigger value="colors" className="text-xs">
                   <Palette className="w-3 h-3 mr-1" />
                   {t('template.colors')}
@@ -132,8 +119,8 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="p-4">
-                <TabsContent value="colors" className="mt-0 space-y-6">
+              <ScrollArea className="flex-1 px-4">
+                <TabsContent value="colors" className="mt-0 space-y-6 pb-4">
                   {/* Color Presets */}
                   <div>
                     <Label className="text-sm font-medium mb-3 block">{t('template.colorPalette')}</Label>
@@ -243,7 +230,7 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="typography" className="mt-0 space-y-6">
+                <TabsContent value="typography" className="mt-0 space-y-6 pb-4">
                   {/* Font Family */}
                   <div>
                     <Label className="text-sm font-medium mb-3 block">{t('template.fontFamily')}</Label>
@@ -296,7 +283,7 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="layout" className="mt-0 space-y-6">
+                <TabsContent value="layout" className="mt-0 space-y-6 pb-4">
                   {/* Spacing */}
                   <div>
                     <Label className="text-sm font-medium mb-3 block">{t('template.spacing')}</Label>
@@ -367,11 +354,11 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
                     </div>
                   </div>
                 </TabsContent>
-              </div>
+              </ScrollArea>
             </Tabs>
 
             {/* Action Buttons */}
-            <div className="p-4 border-t bg-muted/30 space-y-2">
+            <div className="p-4 border-t bg-muted/30 space-y-2 flex-shrink-0">
               <Button onClick={handleApply} className="w-full">
                 <Check className="w-4 h-4 mr-2" />
                 {t('template.applyAndSelect')}
@@ -394,14 +381,14 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
             </div>
             
             <div 
-              className="bg-white rounded-lg shadow-2xl mx-auto overflow-hidden"
+              className="rounded-lg shadow-2xl mx-auto overflow-hidden"
               style={{ 
                 width: '210mm', 
                 minHeight: '297mm',
                 maxWidth: '100%',
-                transform: 'scale(0.6)',
+                transform: 'scale(0.55)',
                 transformOrigin: 'top center',
-                ...getTemplateStyle()
+                backgroundColor: localCustomization.backgroundColor,
               }}
             >
               {renderTemplate()}
