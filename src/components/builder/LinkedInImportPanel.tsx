@@ -36,24 +36,33 @@ const LinkedInImportPanel = () => {
   };
 
   const extractTextFromPDF = async (file: File): Promise<string> => {
-    // Use pdf.js to extract text from PDF
-    const pdfjsLib = await import('pdfjs-dist');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-    
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    
-    let fullText = '';
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ');
-      fullText += pageText + '\n';
-    }
-    
-    return fullText;
+    // Read PDF as text - basic extraction
+    // For LinkedIn PDFs, we'll extract text content
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const text = e.target?.result as string;
+          // Extract readable text from PDF binary
+          // This is a simplified approach - for production, consider a server-side solution
+          const extractedText = text
+            .replace(/[^\x20-\x7E\n\r\tğüşıöçĞÜŞİÖÇ]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          if (extractedText.length < 100) {
+            // If extraction is poor, ask user to copy-paste instead
+            reject(new Error(t('linkedin.useManualCopy') || 'Could not extract text. Please copy and paste your LinkedIn content using AI Parse mode.'));
+            return;
+          }
+          resolve(extractedText);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsText(file);
+    });
   };
 
   const handleImport = async () => {
