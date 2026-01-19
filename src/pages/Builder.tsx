@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Download, Eye, FileText, Loader2, Settings, Wand2, PenTool, Layers, History, Briefcase, Save, LayoutDashboard } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Eye, FileText, Loader2, Settings, Wand2, PenTool, Layers, History, Briefcase, Save, LayoutDashboard, Linkedin } from 'lucide-react';
 import { CVProvider, useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,6 +17,7 @@ import SummaryStep from '@/components/wizard/SummaryStep';
 import CVPreview from '@/components/builder/CVPreview';
 import AIAnalysisPanel from '@/components/builder/AIAnalysisPanel';
 import AITextInputPanel from '@/components/builder/AITextInputPanel';
+import LinkedInImportPanel from '@/components/builder/LinkedInImportPanel';
 import TemplateSelector from '@/components/builder/TemplateSelector';
 import SectionControlPanel from '@/components/builder/SectionControlPanel';
 import VersionHistoryPanel from '@/components/builder/VersionHistoryPanel';
@@ -171,6 +172,15 @@ const BuilderContent = () => {
                 <Wand2 className="w-4 h-4" />
                 {t('mode.aiText') || 'AI Parse'}
               </Button>
+              <Button
+                variant={creationMode === 'linkedin' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setCreationMode('linkedin')}
+                className="gap-2"
+              >
+                <Linkedin className="w-4 h-4" />
+                {t('mode.linkedin') || 'LinkedIn'}
+              </Button>
             </div>
 
             {isAuthenticated && (
@@ -218,6 +228,10 @@ const BuilderContent = () => {
         {creationMode === 'ai-text' ? (
           <div className="max-w-3xl mx-auto">
             <AITextInputPanel />
+          </div>
+        ) : creationMode === 'linkedin' ? (
+          <div className="max-w-3xl mx-auto">
+            <LinkedInImportPanel />
           </div>
         ) : (
           <>
