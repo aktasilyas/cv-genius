@@ -34,6 +34,7 @@ import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
 import AuthButton from '@/components/auth/AuthButton';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import html2pdf from 'html2pdf.js';
 
 const getSteps = (t: (key: string) => string) => [
   { id: 0, titleKey: 'builder.personalInfo', component: PersonalInfoStep },
@@ -81,7 +82,6 @@ const BuilderContent = () => {
   const exportToPDF = async () => {
     setIsExporting(true);
     try {
-      const html2pdf = (await import('html2pdf.js')).default;
       
       // Find the preview element directly from DOM
       const previewElement = document.getElementById('cv-preview-content');
