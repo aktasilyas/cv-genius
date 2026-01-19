@@ -5,116 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Simple PDF text extraction for Deno environment
-function extractTextFromPDFBuffer(buffer: Uint8Array): string {
-  const decoder = new TextDecoder('latin1');
-  const pdfContent = decoder.decode(buffer);
-  
-  const textChunks: string[] = [];
-  
-  // Extract text between stream and endstream markers
-  const streamRegex = /stream[\r\n]+([\s\S]*?)[\r\n]+endstream/g;
-  let match;
-  
-  while ((match = streamRegex.exec(pdfContent)) !== null) {
-    const streamContent = match[1];
-    
-    // Try to extract text from BT/ET blocks (text objects)
-    const textBlockRegex = /BT[\s\S]*?ET/g;
-    let textMatch;
-    
-    while ((textMatch = textBlockRegex.exec(streamContent)) !== null) {
-      const textBlock = textMatch[0];
-      
-      // Extract text from Tj, TJ, and ' operators
-      const textOperatorRegex = /\(([^)]*)\)\s*(?:Tj|')/g;
-      let opMatch;
-      while ((opMatch = textOperatorRegex.exec(textBlock)) !== null) {
-        textChunks.push(opMatch[1]);
-      }
-      
-      // Extract text from TJ arrays
-      const tjArrayRegex = /\[(.*?)\]\s*TJ/g;
-      let tjMatch;
-      while ((tjMatch = tjArrayRegex.exec(textBlock)) !== null) {
-        const arrayContent = tjMatch[1];
-        const stringRegex = /\(([^)]*)\)/g;
-        let strMatch;
-        while ((strMatch = stringRegex.exec(arrayContent)) !== null) {
-          textChunks.push(strMatch[1]);
-        }
-      }
-    }
-  }
-  
-  // Also try to find plain text patterns
-  const plainTextRegex = /\/T[dD]\s*\(([^)]+)\)/g;
-  while ((match = plainTextRegex.exec(pdfContent)) !== null) {
-    textChunks.push(match[1]);
-  }
-  
-  // Decode PDF escape sequences
-  let text = textChunks.join(' ')
-    .replace(/\\n/g, '\n')
-    .replace(/\\r/g, '\r')
-    .replace(/\\t/g, '\t')
-    .replace(/\\\\/g, '\\')
-    .replace(/\\'/g, "'")
-    .replace(/\\"/g, '"')
-    .replace(/\\([0-7]{3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
-  
-  // Clean up and normalize whitespace
-  text = text
-    .replace(/[^\x20-\x7E\n\r\tğüşıöçĞÜŞİÖÇäöüÄÖÜßéèêëàâäùûüôôçñáíóúÁÉÍÓÚ]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  
-  return text;
-}
-
-// Alternative extraction using simpler patterns for LinkedIn PDFs
-function extractLinkedInPDFText(buffer: Uint8Array): string {
-  const decoder = new TextDecoder('utf-8', { fatal: false });
-  let content = decoder.decode(buffer);
-  
-  // LinkedIn PDFs often have text in readable format between specific markers
-  const textParts: string[] = [];
-  
-  // Look for text in parentheses (common PDF text format)
-  const parenRegex = /\(([A-Za-z0-9\s\-\.\,\@\+\(\)\/\:\;\!\?\#\$\%\&\*\_\=\'\"àáâãäåæçèéêëìíîïñòóôõöøùúûüýÿğüşıöçĞÜŞİÖÇ]+)\)/g;
-  let match;
-  while ((match = parenRegex.exec(content)) !== null) {
-    const text = match[1].trim();
-    if (text.length > 2 && !/^[0-9.]+$/.test(text)) {
-      textParts.push(text);
-    }
-  }
-  
-  // Also look for Unicode text streams
-  const unicodeRegex = /<([0-9A-Fa-f]{4,})>/g;
-  while ((match = unicodeRegex.exec(content)) !== null) {
-    try {
-      const hex = match[1];
-      let decoded = '';
-      for (let i = 0; i < hex.length; i += 4) {
-        const code = parseInt(hex.substr(i, 4), 16);
-        if (code > 31 && code < 127) {
-          decoded += String.fromCharCode(code);
-        } else if (code >= 127) {
-          decoded += String.fromCharCode(code);
-        }
-      }
-      if (decoded.trim().length > 1) {
-        textParts.push(decoded.trim());
-      }
-    } catch {
-      // Ignore decoding errors
-    }
-  }
-  
-  return textParts.join(' ').replace(/\s+/g, ' ').trim();
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -128,85 +18,69 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    let cvText = text || '';
-    
-    // If PDF base64 is provided, extract text from it
-    if (pdfBase64 && !cvText) {
-      console.log("Extracting text from PDF base64...");
-      
-      try {
-        // Decode base64 to buffer
-        const binaryString = atob(pdfBase64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        
-        // Try multiple extraction methods
-        let extractedText = extractTextFromPDFBuffer(bytes);
-        
-        // If first method yields poor results, try LinkedIn-specific extraction
-        if (extractedText.length < 100) {
-          console.log("Primary extraction yielded poor results, trying LinkedIn-specific method...");
-          extractedText = extractLinkedInPDFText(bytes);
-        }
-        
-        // If still poor, fall back to raw text scan
-        if (extractedText.length < 100) {
-          console.log("Trying raw text scan...");
-          const decoder = new TextDecoder('latin1');
-          const rawText = decoder.decode(bytes);
-          
-          // Extract any readable text patterns
-          const readableRegex = /[A-Za-z][A-Za-z0-9\s\-\.\,\@\+\/\:\;\!\?\#\$\%\&\*\_\=\'\"]{10,}/g;
-          const readableChunks = rawText.match(readableRegex) || [];
-          extractedText = readableChunks.join(' ').substring(0, 50000);
-        }
-        
-        cvText = extractedText;
-        console.log(`Extracted ${cvText.length} characters from PDF`);
-        
-      } catch (pdfError) {
-        console.error("PDF extraction error:", pdfError);
-        throw new Error("Could not extract text from PDF. Please try copying and pasting your CV text instead.");
-      }
-    }
-
-    if (!cvText || cvText.length < 50) {
-      throw new Error("No valid text content found. Please paste your CV text directly or try a different PDF.");
-    }
-
     const languageInstructions = {
-      en: "Parse the text and respond in English.",
-      tr: "Metni ayrıştır ve Türkçe yanıt ver.",
-      de: "Analysiere den Text und antworte auf Deutsch.",
-      fr: "Analyse le texte et réponds en français.",
-      es: "Analiza el texto y responde en español."
+      en: "Parse the CV and respond in English.",
+      tr: "CV'yi ayrıştır ve Türkçe yanıt ver.",
+      de: "Analysiere den Lebenslauf und antworte auf Deutsch.",
+      fr: "Analyse le CV et réponds en français.",
+      es: "Analiza el CV y responde en español."
     };
 
-    const systemPrompt = `You are an expert CV/Resume parser. Extract structured information from the provided CV content.
+    const systemPrompt = `You are an expert CV/Resume parser. Extract ALL structured information from the provided CV/Resume.
 
 ${languageInstructions[language as keyof typeof languageInstructions] || languageInstructions.en}
 
-IMPORTANT PARSING GUIDELINES:
-1. The text may be extracted from a PDF and could have formatting issues - interpret it intelligently
-2. LinkedIn PDF exports have a specific format - name is usually at the top, followed by headline/title
-3. Look for patterns like email addresses (containing @), phone numbers, URLs
-4. Work experience entries typically contain company names, job titles, and dates
-5. Education entries contain institution names, degrees, and dates
-6. Extract skills as individual items, estimating proficiency based on context
-7. If something is ambiguous, make your best educated guess rather than leaving it empty
+CRITICAL PARSING GUIDELINES:
+1. Extract EVERY piece of information you can find - do not skip anything
+2. For LinkedIn PDF exports: The name is at the very top, followed by the headline/title
+3. Look carefully for:
+   - Email addresses (containing @)
+   - Phone numbers (various formats)
+   - LinkedIn URLs
+   - Location/Address
+4. Work Experience: Extract ALL jobs with company names, positions, dates, and descriptions
+5. Education: Extract ALL education entries with institutions, degrees, fields, and dates
+6. Skills: List ALL skills mentioned, estimate proficiency based on context
+7. Languages: Extract language proficiencies
+8. Certifications: Extract any certificates or certifications
 
-Parse and extract:
-1. Personal Information (name, email, phone, location, LinkedIn URL, website, professional title/headline)
-2. Professional Summary (often appears as "About" or "Summary" section)
-3. Work Experience (company, position, dates, description, key achievements)
-4. Education (institution, degree, field of study, dates, GPA if mentioned, achievements)
-5. Skills (name and estimated proficiency level: beginner, intermediate, advanced, expert)
-6. Languages (name and proficiency: basic, conversational, professional, native)
-7. Certificates/Certifications (name, issuer, date, credential URL if available)
+IMPORTANT: Parse the ENTIRE document thoroughly. LinkedIn PDFs contain valuable information - extract it all!
 
 Generate unique IDs (like "exp_1", "edu_1", "skill_1") for array items.`;
+
+    // Build the messages array based on whether we have a PDF or text
+    const messages: any[] = [
+      { role: "system", content: systemPrompt }
+    ];
+
+    if (pdfBase64) {
+      // Use multimodal capability - send PDF as base64 image/document
+      // Gemini can read PDF content when sent as base64
+      console.log("Processing PDF with multimodal AI...");
+      
+      messages.push({
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Please parse this CV/Resume PDF document and extract all structured information. Look at every section carefully and extract personal info, work experience, education, skills, languages, and certifications."
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:application/pdf;base64,${pdfBase64}`
+            }
+          }
+        ]
+      });
+    } else if (text) {
+      messages.push({
+        role: "user",
+        content: `Parse this CV/Resume text into structured data:\n\n${text.substring(0, 50000)}`
+      });
+    } else {
+      throw new Error("No CV content provided. Please provide either text or a PDF file.");
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -216,59 +90,66 @@ Generate unique IDs (like "exp_1", "edu_1", "skill_1") for array items.`;
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Parse this CV/Resume text into structured data. The text may have been extracted from a PDF so please interpret it intelligently:\n\n${cvText.substring(0, 30000)}` }
-        ],
+        messages,
         tools: [
           {
             type: "function",
             function: {
               name: "parse_cv_data",
-              description: "Parse CV text into structured CV data",
+              description: "Parse CV/Resume into structured data with all sections",
               parameters: {
                 type: "object",
                 properties: {
                   personalInfo: {
                     type: "object",
+                    description: "Personal and contact information",
                     properties: {
                       fullName: { type: "string", description: "Full name of the person" },
                       email: { type: "string", description: "Email address" },
                       phone: { type: "string", description: "Phone number" },
-                      location: { type: "string", description: "City, Country or full address" },
+                      location: { type: "string", description: "City, Country or address" },
                       linkedin: { type: "string", description: "LinkedIn profile URL" },
-                      website: { type: "string", description: "Personal website or portfolio URL" },
-                      title: { type: "string", description: "Professional title or headline" }
+                      website: { type: "string", description: "Personal website URL" },
+                      title: { type: "string", description: "Professional title/headline" }
                     },
                     required: ["fullName", "title"]
                   },
-                  summary: { type: "string", description: "Professional summary or about section" },
+                  summary: { 
+                    type: "string", 
+                    description: "Professional summary or About section" 
+                  },
                   experience: {
                     type: "array",
+                    description: "Work experience entries",
                     items: {
                       type: "object",
                       properties: {
                         id: { type: "string" },
-                        company: { type: "string" },
-                        position: { type: "string" },
-                        startDate: { type: "string", description: "Format: YYYY-MM or Month Year" },
-                        endDate: { type: "string", description: "Format: YYYY-MM, Month Year, or 'Present'" },
-                        current: { type: "boolean" },
-                        description: { type: "string" },
-                        achievements: { type: "array", items: { type: "string" } }
+                        company: { type: "string", description: "Company name" },
+                        position: { type: "string", description: "Job title" },
+                        startDate: { type: "string", description: "Start date (YYYY-MM or Month Year)" },
+                        endDate: { type: "string", description: "End date or 'Present'" },
+                        current: { type: "boolean", description: "Is this current job" },
+                        description: { type: "string", description: "Job description and responsibilities" },
+                        achievements: { 
+                          type: "array", 
+                          items: { type: "string" },
+                          description: "Key achievements and accomplishments"
+                        }
                       },
-                      required: ["id", "company", "position", "startDate"]
+                      required: ["id", "company", "position"]
                     }
                   },
                   education: {
                     type: "array",
+                    description: "Education entries",
                     items: {
                       type: "object",
                       properties: {
                         id: { type: "string" },
-                        institution: { type: "string" },
-                        degree: { type: "string" },
-                        field: { type: "string" },
+                        institution: { type: "string", description: "School/University name" },
+                        degree: { type: "string", description: "Degree type (Bachelor, Master, etc.)" },
+                        field: { type: "string", description: "Field of study" },
                         startDate: { type: "string" },
                         endDate: { type: "string" },
                         gpa: { type: "string" },
@@ -279,38 +160,49 @@ Generate unique IDs (like "exp_1", "edu_1", "skill_1") for array items.`;
                   },
                   skills: {
                     type: "array",
+                    description: "Skills with proficiency levels",
                     items: {
                       type: "object",
                       properties: {
                         id: { type: "string" },
-                        name: { type: "string" },
-                        level: { type: "string", enum: ["beginner", "intermediate", "advanced", "expert"] }
+                        name: { type: "string", description: "Skill name" },
+                        level: { 
+                          type: "string", 
+                          enum: ["beginner", "intermediate", "advanced", "expert"],
+                          description: "Proficiency level"
+                        }
                       },
                       required: ["id", "name", "level"]
                     }
                   },
                   languages: {
                     type: "array",
+                    description: "Language proficiencies",
                     items: {
                       type: "object",
                       properties: {
                         id: { type: "string" },
-                        name: { type: "string" },
-                        proficiency: { type: "string", enum: ["basic", "conversational", "professional", "native"] }
+                        name: { type: "string", description: "Language name" },
+                        proficiency: { 
+                          type: "string", 
+                          enum: ["basic", "conversational", "professional", "native"],
+                          description: "Proficiency level"
+                        }
                       },
                       required: ["id", "name", "proficiency"]
                     }
                   },
                   certificates: {
                     type: "array",
+                    description: "Certifications and credentials",
                     items: {
                       type: "object",
                       properties: {
                         id: { type: "string" },
-                        name: { type: "string" },
-                        issuer: { type: "string" },
-                        date: { type: "string" },
-                        url: { type: "string" }
+                        name: { type: "string", description: "Certificate name" },
+                        issuer: { type: "string", description: "Issuing organization" },
+                        date: { type: "string", description: "Issue date" },
+                        url: { type: "string", description: "Credential URL" }
                       },
                       required: ["id", "name", "issuer"]
                     }
@@ -348,12 +240,12 @@ Generate unique IDs (like "exp_1", "edu_1", "skill_1") for array items.`;
     
     if (!toolCall) {
       console.error("No tool call in response:", JSON.stringify(data));
-      throw new Error("Failed to parse CV - no structured response from AI");
+      throw new Error("Failed to parse CV - AI did not return structured data");
     }
 
     const result = JSON.parse(toolCall.function.arguments);
     
-    // Ensure all required fields have default values
+    // Normalize and ensure all required fields have default values
     const normalizedResult = {
       personalInfo: {
         fullName: result.personalInfo?.fullName || '',
@@ -371,7 +263,7 @@ Generate unique IDs (like "exp_1", "edu_1", "skill_1") for array items.`;
         position: exp.position || '',
         startDate: exp.startDate || '',
         endDate: exp.endDate || '',
-        current: exp.current || false,
+        current: exp.current || exp.endDate?.toLowerCase()?.includes('present') || false,
         description: exp.description || '',
         achievements: exp.achievements || []
       })),
@@ -404,10 +296,13 @@ Generate unique IDs (like "exp_1", "edu_1", "skill_1") for array items.`;
       }))
     };
 
-    console.log("Successfully parsed CV with:", {
+    console.log("Successfully parsed CV:", {
+      name: normalizedResult.personalInfo.fullName,
       experiences: normalizedResult.experience.length,
       education: normalizedResult.education.length,
-      skills: normalizedResult.skills.length
+      skills: normalizedResult.skills.length,
+      languages: normalizedResult.languages.length,
+      certificates: normalizedResult.certificates.length
     });
 
     return new Response(JSON.stringify(normalizedResult), {
