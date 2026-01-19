@@ -1,4 +1,4 @@
-import { CVData } from '@/types/cv';
+import { CVData, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
 import { Language } from '@/lib/translations';
 
@@ -6,10 +6,16 @@ interface ClassicTemplateProps {
   data: CVData;
   language?: Language;
   t?: (key: string) => string;
+  customization?: TemplateCustomization;
 }
 
-const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, language = 'en', t = (key: string) => key }) => {
-  const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility, sectionOrder } = data;
+const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ 
+  data, 
+  language = 'en', 
+  t = (key: string) => key,
+  customization = defaultTemplateCustomization
+}) => {
+  const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
 
   const formatDate = (date: string) => {
     if (!date) return '';
@@ -22,17 +28,63 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, language = 'en'
 
   const visibility = sectionVisibility || { summary: true, experience: true, education: true, skills: true, languages: true, certificates: true };
 
+  // Style calculations
+  const fontFamilyMap: Record<string, string> = {
+    inter: "'Inter', sans-serif",
+    playfair: "'Playfair Display', serif",
+    roboto: "'Roboto', sans-serif",
+    opensans: "'Open Sans', sans-serif",
+    lato: "'Lato', sans-serif",
+    montserrat: "'Montserrat', sans-serif",
+  };
+
+  const fontSizeMap = {
+    small: { base: '12px', heading: '28px', section: '16px' },
+    medium: { base: '14px', heading: '32px', section: '18px' },
+    large: { base: '16px', heading: '36px', section: '20px' },
+  };
+
+  const spacingMap = {
+    compact: '16px',
+    normal: '24px',
+    relaxed: '32px',
+  };
+
+  const borderMap = {
+    none: '0px',
+    subtle: '2px',
+    bold: '4px',
+  };
+
   return (
-    <div className="bg-white text-gray-900 p-8 min-h-[1123px] font-serif text-sm">
+    <div 
+      className="min-h-[1123px]"
+      style={{
+        fontFamily: fontFamilyMap[customization.fontFamily],
+        fontSize: fontSizeMap[customization.fontSize].base,
+        backgroundColor: customization.backgroundColor,
+        color: customization.textColor,
+        padding: spacingMap[customization.spacing],
+      }}
+    >
       {/* Header */}
-      <header className="text-center border-b-2 border-gray-800 pb-6 mb-6">
-        <h1 className="text-4xl font-bold text-gray-900 tracking-wide mb-2">
+      <header 
+        className="text-center pb-6 mb-6"
+        style={{ 
+          borderBottomWidth: borderMap[customization.borderStyle],
+          borderColor: customization.textColor
+        }}
+      >
+        <h1 
+          className="font-bold tracking-wide mb-2"
+          style={{ fontSize: fontSizeMap[customization.fontSize].heading, color: customization.textColor }}
+        >
           {personalInfo.fullName || 'Your Name'}
         </h1>
-        <p className="text-lg text-gray-600 italic mb-4">
+        <p className="italic mb-4" style={{ fontSize: fontSizeMap[customization.fontSize].section, color: `${customization.textColor}99` }}>
           {personalInfo.title || 'Professional Title'}
         </p>
-        <div className="flex flex-wrap justify-center gap-4 text-gray-600 text-xs">
+        <div className="flex flex-wrap justify-center gap-4 text-xs" style={{ color: `${customization.textColor}99` }}>
           {personalInfo.email && (
             <span className="flex items-center gap-1">
               <Mail className="w-3 h-3" />
@@ -68,28 +120,38 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, language = 'en'
 
       {/* Summary */}
       {visibility.summary && summary && (
-        <section className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.summary')}</h2>
-          <p className="text-gray-700 leading-relaxed">{summary}</p>
+        <section style={{ marginBottom: spacingMap[customization.spacing] }}>
+          <h2 
+            className="font-bold uppercase tracking-wider mb-3"
+            style={{ fontSize: fontSizeMap[customization.fontSize].section, color: customization.textColor }}
+          >
+            {t('cv.summary')}
+          </h2>
+          <p className="leading-relaxed" style={{ color: `${customization.textColor}cc` }}>{summary}</p>
         </section>
       )}
 
       {/* Experience */}
       {visibility.experience && experience.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.experience')}</h2>
+        <section style={{ marginBottom: spacingMap[customization.spacing] }}>
+          <h2 
+            className="font-bold uppercase tracking-wider mb-3"
+            style={{ fontSize: fontSizeMap[customization.fontSize].section, color: customization.textColor }}
+          >
+            {t('cv.experience')}
+          </h2>
           <div className="space-y-4">
             {experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="font-bold text-gray-900">{exp.position || 'Position'}</h3>
-                  <span className="text-gray-500 text-xs italic">
+                  <h3 className="font-bold" style={{ color: customization.textColor }}>{exp.position || 'Position'}</h3>
+                  <span className="text-xs italic" style={{ color: `${customization.textColor}80` }}>
                     {formatDate(exp.startDate)} — {exp.current ? t('cv.present') : formatDate(exp.endDate)}
                   </span>
                 </div>
-                <p className="text-gray-600 italic mb-2">{exp.company || 'Company'}</p>
+                <p className="italic mb-2" style={{ color: customization.primaryColor }}>{exp.company || 'Company'}</p>
                 {exp.description && (
-                  <p className="text-gray-700 text-xs whitespace-pre-line">{exp.description}</p>
+                  <p className="text-xs whitespace-pre-line" style={{ color: `${customization.textColor}cc` }}>{exp.description}</p>
                 )}
               </div>
             ))}
@@ -99,18 +161,23 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, language = 'en'
 
       {/* Education */}
       {visibility.education && education.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.education')}</h2>
+        <section style={{ marginBottom: spacingMap[customization.spacing] }}>
+          <h2 
+            className="font-bold uppercase tracking-wider mb-3"
+            style={{ fontSize: fontSizeMap[customization.fontSize].section, color: customization.textColor }}
+          >
+            {t('cv.education')}
+          </h2>
           <div className="space-y-3">
             {education.map((edu) => (
               <div key={edu.id}>
                 <div className="flex justify-between items-baseline">
-                  <h3 className="font-bold text-gray-900">{edu.institution}</h3>
-                  <span className="text-gray-500 text-xs italic">
+                  <h3 className="font-bold" style={{ color: customization.textColor }}>{edu.institution}</h3>
+                  <span className="text-xs italic" style={{ color: `${customization.textColor}80` }}>
                     {formatDate(edu.startDate)} — {formatDate(edu.endDate)}
                   </span>
                 </div>
-                <p className="text-gray-600 italic">
+                <p className="italic" style={{ color: customization.primaryColor }}>
                   {edu.degree} in {edu.field}
                   {edu.gpa && `, GPA: ${edu.gpa}`}
                 </p>
@@ -124,11 +191,16 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, language = 'en'
         {/* Skills */}
         {visibility.skills && skills.length > 0 && (
           <section>
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.skills')}</h2>
-            <ul className="list-disc list-inside text-gray-700 text-xs space-y-1">
+            <h2 
+              className="font-bold uppercase tracking-wider mb-3"
+              style={{ fontSize: fontSizeMap[customization.fontSize].section, color: customization.textColor }}
+            >
+              {t('cv.skills')}
+            </h2>
+            <ul className="list-disc list-inside text-xs space-y-1" style={{ color: `${customization.textColor}cc` }}>
               {skills.map((skill) => (
                 <li key={skill.id}>
-                  {skill.name} <span className="text-gray-500">({skill.level})</span>
+                  {skill.name} <span style={{ color: `${customization.textColor}80` }}>({skill.level})</span>
                 </li>
               ))}
             </ul>
@@ -138,11 +210,16 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, language = 'en'
         {/* Languages */}
         {visibility.languages && languages.length > 0 && (
           <section>
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.languages')}</h2>
-            <ul className="list-disc list-inside text-gray-700 text-xs space-y-1">
+            <h2 
+              className="font-bold uppercase tracking-wider mb-3"
+              style={{ fontSize: fontSizeMap[customization.fontSize].section, color: customization.textColor }}
+            >
+              {t('cv.languages')}
+            </h2>
+            <ul className="list-disc list-inside text-xs space-y-1" style={{ color: `${customization.textColor}cc` }}>
               {languages.map((lang) => (
                 <li key={lang.id}>
-                  {lang.name} <span className="text-gray-500">({lang.proficiency})</span>
+                  {lang.name} <span style={{ color: `${customization.textColor}80` }}>({lang.proficiency})</span>
                 </li>
               ))}
             </ul>
@@ -152,15 +229,20 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, language = 'en'
 
       {/* Certificates */}
       {visibility.certificates && certificates && certificates.length > 0 && (
-        <section className="mt-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-3">{t('cv.certificates')}</h2>
+        <section style={{ marginTop: spacingMap[customization.spacing] }}>
+          <h2 
+            className="font-bold uppercase tracking-wider mb-3"
+            style={{ fontSize: fontSizeMap[customization.fontSize].section, color: customization.textColor }}
+          >
+            {t('cv.certificates')}
+          </h2>
           <div className="grid grid-cols-2 gap-3">
             {certificates.map((cert) => (
               <div key={cert.id} className="flex items-start gap-2 text-xs">
-                <Award className="w-3 h-3 text-gray-600 mt-0.5 flex-shrink-0" />
+                <Award className="w-3 h-3 mt-0.5 flex-shrink-0" style={{ color: customization.primaryColor }} />
                 <div>
-                  <p className="font-medium">{cert.name}</p>
-                  <p className="text-gray-500">{cert.issuer} • {formatDate(cert.date)}</p>
+                  <p className="font-medium" style={{ color: customization.textColor }}>{cert.name}</p>
+                  <p style={{ color: `${customization.textColor}80` }}>{cert.issuer} • {formatDate(cert.date)}</p>
                 </div>
               </div>
             ))}

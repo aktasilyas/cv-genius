@@ -8,11 +8,11 @@ import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
 import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
 
 const CVPreview = () => {
-  const { cvData, selectedTemplate } = useCVContext();
+  const { cvData, selectedTemplate, templateCustomization } = useCVContext();
   const { language, t } = useSettings();
 
   const renderTemplate = () => {
-    const templateProps = { data: cvData, language, t };
+    const templateProps = { data: cvData, language, t, customization: templateCustomization };
     
     switch (selectedTemplate) {
       case 'modern':
