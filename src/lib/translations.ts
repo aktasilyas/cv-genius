@@ -348,6 +348,16 @@ export const translations: Record<Language, Record<string, string>> = {
     'builder.saveSuccess': 'CV saved successfully',
     'builder.updateSuccess': 'CV updated successfully',
     'builder.saveError': 'Failed to save CV',
+    
+    // Validation
+    'validation.required': 'This field is required',
+    'validation.email': 'Please enter a valid email address',
+    'validation.phone': 'Please enter a valid phone number',
+    'validation.date': 'Please use format: YYYY-MM (e.g., 2024-01)',
+    'validation.minLength': 'Minimum {min} characters required',
+    'validation.maxLength': 'Maximum {max} characters allowed',
+    'validation.pattern': 'Invalid format',
+    'field.optional': 'Optional',
   },
   tr: {
     // Navigation
@@ -696,6 +706,16 @@ export const translations: Record<Language, Record<string, string>> = {
     'builder.saveSuccess': 'CV başarıyla kaydedildi',
     'builder.updateSuccess': 'CV başarıyla güncellendi',
     'builder.saveError': 'CV kaydedilemedi',
+    
+    // Validation
+    'validation.required': 'Bu alan zorunludur',
+    'validation.email': 'Geçerli bir e-posta adresi girin',
+    'validation.phone': 'Geçerli bir telefon numarası girin',
+    'validation.date': 'YYYY-AA formatında girin (örn: 2024-01)',
+    'validation.minLength': 'En az {min} karakter gerekli',
+    'validation.maxLength': 'En fazla {max} karakter girilebilir',
+    'validation.pattern': 'Geçersiz format',
+    'field.optional': 'İsteğe bağlı',
   },
   de: {
     'nav.templates': 'Vorlagen',
