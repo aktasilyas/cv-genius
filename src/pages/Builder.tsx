@@ -155,21 +155,23 @@ const BuilderContent = () => {
     }
   };
 
+  const [mobileView, setMobileView] = useState<'form' | 'preview'>('form');
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
-              <FileText className="w-5 h-5 text-accent-foreground" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent flex items-center justify-center">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-accent-foreground" />
             </div>
-            <span className="text-xl font-display font-semibold">CVCraft</span>
+            <span className="text-lg sm:text-xl font-display font-semibold hidden xs:inline">CVCraft</span>
           </Link>
 
-          <div className="flex items-center gap-3">
-            {/* Creation Mode Toggle */}
-            <div className="hidden md:flex items-center gap-1 bg-secondary rounded-lg p-1">
+          <div className="flex items-center gap-1 sm:gap-3">
+            {/* Creation Mode Toggle - Desktop Only */}
+            <div className="hidden lg:flex items-center gap-1 bg-secondary rounded-lg p-1">
               <Button
                 variant={creationMode === 'structured' ? 'default' : 'ghost'}
                 size="sm"
@@ -204,7 +206,7 @@ const BuilderContent = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/dashboard')}
-                className="gap-2"
+                className="gap-2 px-2 sm:px-3"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 <span className="hidden md:inline">{t('nav.dashboard') || 'My CVs'}</span>
@@ -213,8 +215,8 @@ const BuilderContent = () => {
 
             <AuthButton />
             
-            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
-              <Settings className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="w-8 h-8 sm:w-9 sm:h-9">
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
 
             {isAuthenticated && (
@@ -223,16 +225,16 @@ const BuilderContent = () => {
                 size="sm"
                 onClick={handleSaveCV}
                 disabled={isSaving}
-                className="gap-2"
+                className="gap-1 sm:gap-2 px-2 sm:px-3"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span className="hidden md:inline">{t('btn.save') || 'Save'}</span>
+                <span className="hidden sm:inline">{t('btn.save') || 'Save'}</span>
               </Button>
             )}
 
-            <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting}>
+            <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting} className="gap-1 sm:gap-2 px-2 sm:px-3">
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              {t('btn.export')}
+              <span className="hidden sm:inline">{t('btn.export')}</span>
             </Button>
           </div>
         </div>
@@ -240,7 +242,40 @@ const BuilderContent = () => {
       
       <SettingsSidebar isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
-      <div className="container mx-auto px-4 py-8">
+      {/* Mobile Creation Mode Toggle */}
+      <div className="lg:hidden container mx-auto px-2 pt-3">
+        <div className="flex items-center gap-1 bg-secondary rounded-lg p-1 w-full">
+          <Button
+            variant={creationMode === 'structured' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setCreationMode('structured')}
+            className="flex-1 gap-1 text-xs sm:text-sm"
+          >
+            <PenTool className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline">{t('mode.structured') || 'Manual'}</span>
+          </Button>
+          <Button
+            variant={creationMode === 'ai-text' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setCreationMode('ai-text')}
+            className="flex-1 gap-1 text-xs sm:text-sm"
+          >
+            <Wand2 className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline">{t('mode.aiText') || 'AI'}</span>
+          </Button>
+          <Button
+            variant={creationMode === 'linkedin' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setCreationMode('linkedin')}
+            className="flex-1 gap-1 text-xs sm:text-sm"
+          >
+            <Linkedin className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline">{t('mode.linkedin') || 'LinkedIn'}</span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {creationMode === 'ai-text' ? (
           <div className="max-w-3xl mx-auto">
             <AITextInputPanel />
@@ -251,31 +286,31 @@ const BuilderContent = () => {
           </div>
         ) : (
           <>
-            {/* Template Selector - More Prominent */}
-            <div className="mb-8 p-6 card-elevated">
-              <div className="flex items-center justify-between mb-4">
+            {/* Template Selector - Collapsible on Mobile */}
+            <div className="mb-4 sm:mb-8 p-3 sm:p-6 card-elevated">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-primary" />
+                  <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                    <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     {t('template.choose') || 'Choose Template'}
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1">{t('template.chooseDesc') || 'Select a template that best fits your style'}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">{t('template.chooseDesc') || 'Select a template that best fits your style'}</p>
                 </div>
               </div>
               <TemplateSelector compact />
             </div>
 
-            {/* Progress Steps */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between max-w-3xl mx-auto overflow-x-auto pb-2">
+            {/* Progress Steps - Scrollable on Mobile */}
+            <div className="mb-4 sm:mb-8">
+              <div className="flex items-center justify-between max-w-3xl mx-auto overflow-x-auto pb-2 gap-1 sm:gap-0 scrollbar-hide">
                 {steps.map((step, index) => (
-                  <button key={step.id} onClick={() => setCurrentStep(step.id)} className="flex flex-col items-center min-w-[60px]">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
+                  <button key={step.id} onClick={() => setCurrentStep(step.id)} className="flex flex-col items-center min-w-[48px] sm:min-w-[60px]">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-all ${
                       currentStep >= step.id ? 'bg-accent text-accent-foreground' : 'bg-secondary text-muted-foreground'
                     }`}>
                       {index + 1}
                     </div>
-                    <span className={`text-xs mt-2 hidden sm:block ${
+                    <span className={`text-[10px] sm:text-xs mt-1 sm:mt-2 text-center leading-tight ${
                       currentStep === step.id ? 'text-foreground font-medium' : 'text-muted-foreground'
                     }`}>
                       {t(step.titleKey) || step.titleKey.split('.')[1]}
@@ -294,56 +329,94 @@ const BuilderContent = () => {
               </div>
             </div>
 
+            {/* Mobile View Toggle */}
+            <div className="lg:hidden flex items-center justify-center gap-2 mb-4">
+              <Button
+                variant={mobileView === 'form' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMobileView('form')}
+                className="flex-1 max-w-[150px] gap-2"
+              >
+                <PenTool className="w-4 h-4" />
+                {t('builder.form') || 'Form'}
+              </Button>
+              <Button
+                variant={mobileView === 'preview' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMobileView('preview')}
+                className="flex-1 max-w-[150px] gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                {t('builder.preview') || 'Preview'}
+              </Button>
+            </div>
+
             {/* Main Content */}
-            <div className="grid gap-6 lg:grid-cols-5">
-              {/* Form Section - Smaller */}
-              <div className="lg:col-span-2">
-                <div className="card-elevated p-6">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-5">
+              {/* Form Section */}
+              <div className={`lg:col-span-2 ${mobileView === 'preview' ? 'hidden lg:block' : ''}`}>
+                <div className="card-elevated p-4 sm:p-6">
                   <AnimatePresence mode="wait">
                     <CurrentStepComponent key={currentStep} />
                   </AnimatePresence>
 
                   {/* Navigation */}
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                  <div className="flex items-center justify-between mt-4 sm:mt-6 pt-4 border-t border-border">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
                       disabled={currentStep === 0}
+                      className="gap-1 sm:gap-2"
                     >
                       <ChevronLeft className="w-4 h-4" />
-                      {t('btn.previous') || 'Previous'}
+                      <span className="hidden xs:inline">{t('btn.previous') || 'Previous'}</span>
                     </Button>
                     {currentStep < steps.length - 1 ? (
-                      <Button variant="accent" size="sm" onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
-                        {t('btn.next') || 'Next'}
+                      <Button variant="accent" size="sm" onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))} className="gap-1 sm:gap-2">
+                        <span className="hidden xs:inline">{t('btn.next') || 'Next'}</span>
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     ) : (
-                      <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting}>
+                      <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting} className="gap-1 sm:gap-2">
                         {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                        {t('btn.export') || 'Export CV'}
+                        <span className="hidden xs:inline">{t('btn.export') || 'Export CV'}</span>
                       </Button>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Right Panel - Larger Preview */}
-              <div className="hidden lg:block lg:col-span-3 space-y-4">
+              {/* Right Panel - Preview */}
+              <div className={`lg:col-span-3 space-y-4 ${mobileView === 'form' ? 'hidden lg:block' : ''}`}>
                 <Tabs value={rightPanel} onValueChange={(v) => setRightPanel(v as any)} className="space-y-4">
-                  <TabsList className="grid grid-cols-5">
-                    <TabsTrigger value="preview" className="gap-1"><Eye className="w-3 h-3" /></TabsTrigger>
-                    <TabsTrigger value="ai" className="gap-1"><Wand2 className="w-3 h-3" /></TabsTrigger>
-                    <TabsTrigger value="job" className="gap-1"><Briefcase className="w-3 h-3" /></TabsTrigger>
-                    <TabsTrigger value="sections" className="gap-1"><Layers className="w-3 h-3" /></TabsTrigger>
-                    <TabsTrigger value="history" className="gap-1"><History className="w-3 h-3" /></TabsTrigger>
+                  <TabsList className="grid grid-cols-5 h-9 sm:h-10">
+                    <TabsTrigger value="preview" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{t('tab.preview') || 'Preview'}</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="ai" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <Wand2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{t('tab.ai') || 'AI'}</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="job" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <Briefcase className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{t('tab.job') || 'Job'}</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="sections" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <Layers className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{t('tab.sections') || 'Sections'}</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="history" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <History className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{t('tab.history') || 'History'}</span>
+                    </TabsTrigger>
                   </TabsList>
                   <TabsContent value="preview"><CVPreview /></TabsContent>
                   <TabsContent value="ai"><AIAnalysisPanel /></TabsContent>
-                  <TabsContent value="job"><div className="card-elevated p-6"><JobMatchPanel /></div></TabsContent>
-                  <TabsContent value="sections"><div className="card-elevated p-6"><SectionControlPanel /></div></TabsContent>
-                  <TabsContent value="history"><div className="card-elevated p-6"><VersionHistoryPanel /></div></TabsContent>
+                  <TabsContent value="job"><div className="card-elevated p-4 sm:p-6"><JobMatchPanel /></div></TabsContent>
+                  <TabsContent value="sections"><div className="card-elevated p-4 sm:p-6"><SectionControlPanel /></div></TabsContent>
+                  <TabsContent value="history"><div className="card-elevated p-4 sm:p-6"><VersionHistoryPanel /></div></TabsContent>
                 </Tabs>
               </div>
             </div>
