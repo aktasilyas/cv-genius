@@ -281,18 +281,19 @@ const BuilderContent = () => {
             </div>
 
             {/* Main Content */}
-            <div className="grid gap-8 lg:grid-cols-3">
-              {/* Form Section */}
+            <div className="grid gap-6 lg:grid-cols-5">
+              {/* Form Section - Smaller */}
               <div className="lg:col-span-2">
-                <div className="card-elevated p-8">
+                <div className="card-elevated p-6">
                   <AnimatePresence mode="wait">
                     <CurrentStepComponent key={currentStep} />
                   </AnimatePresence>
 
                   {/* Navigation */}
-                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
                     <Button
                       variant="outline"
+                      size="sm"
                       onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
                       disabled={currentStep === 0}
                     >
@@ -300,12 +301,12 @@ const BuilderContent = () => {
                       {t('btn.previous') || 'Previous'}
                     </Button>
                     {currentStep < steps.length - 1 ? (
-                      <Button variant="accent" onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
+                      <Button variant="accent" size="sm" onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
                         {t('btn.next') || 'Next'}
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     ) : (
-                      <Button variant="accent" onClick={exportToPDF} disabled={isExporting}>
+                      <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting}>
                         {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                         {t('btn.export') || 'Export CV'}
                       </Button>
@@ -314,8 +315,8 @@ const BuilderContent = () => {
                 </div>
               </div>
 
-              {/* Right Panel - Always show tabs, optionally with preview */}
-              <div className="hidden lg:block space-y-4">
+              {/* Right Panel - Larger Preview */}
+              <div className="hidden lg:block lg:col-span-3 space-y-4">
                 <Tabs value={rightPanel} onValueChange={(v) => setRightPanel(v as any)} className="space-y-4">
                   <TabsList className="grid grid-cols-5">
                     <TabsTrigger value="preview" className="gap-1"><Eye className="w-3 h-3" /></TabsTrigger>
