@@ -80,32 +80,46 @@ const BuilderContent = () => {
 
   const exportToPDF = async () => {
     setIsExporting(true);
-    const html2pdf = (await import('html2pdf.js')).default;
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-    document.body.appendChild(container);
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      // Find the preview element directly from DOM
+      const previewElement = document.getElementById('cv-preview-content');
+      
+      if (previewElement) {
+        // Clone the element for PDF generation
+        const clone = previewElement.cloneNode(true) as HTMLElement;
+        clone.style.transform = 'none';
+        clone.style.width = '210mm';
+        clone.style.minHeight = '297mm';
+        clone.style.margin = '0';
+        clone.style.padding = '0';
+        
+        const opt = {
+          margin: 0,
+          filename: `${cvData.personalInfo.fullName || 'CV'}_Resume.pdf`,
+          image: { type: 'jpeg' as const, quality: 0.98 },
+          html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            logging: false,
+            width: 794, // A4 width in pixels at 96dpi
+            height: 1123, // A4 height in pixels at 96dpi
+          },
+          jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+        };
 
-    const { createRoot } = await import('react-dom/client');
-    const root = createRoot(container);
-    const TemplateComponent = getTemplateComponent();
-    root.render(<TemplateComponent data={cvData} />);
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    const opt = {
-      margin: 0,
-      filename: `${cvData.personalInfo.fullName || 'CV'}_Resume.pdf`,
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-    };
-
-    const element = container.firstChild as HTMLElement;
-    await html2pdf().set(opt).from(element).save();
-    root.unmount();
-    document.body.removeChild(container);
-    setIsExporting(false);
+        await html2pdf().set(opt).from(clone).save();
+        toast.success(t('export.success') || 'PDF exported successfully!');
+      } else {
+        throw new Error('Preview element not found');
+      }
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.error(t('export.error') || 'Failed to export PDF');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleSaveCV = async () => {

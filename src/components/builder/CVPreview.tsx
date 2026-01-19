@@ -31,6 +31,7 @@ const CVPreview = () => {
   return (
     <div className="bg-muted p-4 rounded-xl overflow-auto max-h-[85vh]">
       <div 
+        id="cv-preview-content"
         className="mx-auto shadow-xl rounded-lg overflow-hidden bg-white"
         style={{ 
           width: '210mm', 
