@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Mail, Phone, MapPin, Briefcase, GraduationCap, Award } from 'lucide-react';
+import { Check, Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Settings2, Maximize2 } from 'lucide-react';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
 import { CVTemplate } from '@/types/cv';
+import TemplateCustomizationModal from './TemplateCustomizationModal';
 
 interface TemplateSelectorProps {
   compact?: boolean;
@@ -11,6 +13,13 @@ interface TemplateSelectorProps {
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) => {
   const { selectedTemplate, setSelectedTemplate } = useCVContext();
   const { t } = useSettings();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<CVTemplate>('modern');
+
+  const handleTemplateClick = (templateId: CVTemplate) => {
+    setPreviewTemplate(templateId);
+    setModalOpen(true);
+  };
 
   const templates: { id: CVTemplate; name: string; description: string; preview: React.ReactNode }[] = [
     {
@@ -278,75 +287,112 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
 
   if (compact) {
     return (
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+      <>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+          {templates.map((template) => (
+            <motion.button
+              key={template.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleTemplateClick(template.id)}
+              className={`group relative flex-shrink-0 w-32 text-left p-2 rounded-xl border-2 transition-all ${
+                selectedTemplate === template.id
+                  ? 'border-accent bg-accent/5 shadow-lg'
+                  : 'border-border hover:border-accent/50 hover:shadow-md'
+              }`}
+            >
+              {selectedTemplate === template.id && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute top-1 right-1 w-5 h-5 bg-accent rounded-full flex items-center justify-center z-10"
+                >
+                  <Check className="w-3 h-3 text-accent-foreground" />
+                </motion.div>
+              )}
+              
+              {/* Hover overlay */}
+              <div className="absolute inset-2 top-2 bottom-8 bg-black/0 group-hover:bg-black/40 rounded-lg transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
+                <div className="flex items-center gap-1 text-white text-xs font-medium">
+                  <Maximize2 className="w-3 h-3" />
+                  Önizle
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden h-24 mb-2 border border-gray-100">
+                <div className="transform scale-[0.08] origin-top-left" style={{ width: '1250%', height: '1250%' }}>
+                  {template.preview}
+                </div>
+              </div>
+              <h4 className="text-xs font-medium truncate text-center">{template.name}</h4>
+            </motion.button>
+          ))}
+        </div>
+        
+        <TemplateCustomizationModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          templateId={previewTemplate}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         {templates.map((template) => (
           <motion.button
             key={template.id}
-            whileHover={{ scale: 1.02 }}
+            whileHover={{ scale: 1.02, y: -4 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setSelectedTemplate(template.id)}
-            className={`relative flex-shrink-0 w-32 text-left p-2 rounded-xl border-2 transition-all ${
+            onClick={() => handleTemplateClick(template.id)}
+            className={`group relative text-left p-3 md:p-4 rounded-xl border-2 transition-all ${
               selectedTemplate === template.id
-                ? 'border-accent bg-accent/5 shadow-lg'
-                : 'border-border hover:border-accent/50 hover:shadow-md'
+                ? 'border-accent bg-accent/5 shadow-xl'
+                : 'border-border hover:border-accent/50 hover:shadow-lg'
             }`}
           >
             {selectedTemplate === template.id && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-1 right-1 w-5 h-5 bg-accent rounded-full flex items-center justify-center z-10"
+                className="absolute top-2 right-2 w-6 h-6 bg-accent rounded-full flex items-center justify-center z-20"
               >
-                <Check className="w-3 h-3 text-accent-foreground" />
+                <Check className="w-4 h-4 text-accent-foreground" />
               </motion.div>
             )}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden h-24 mb-2 border border-gray-100">
-              <div className="transform scale-[0.08] origin-top-left" style={{ width: '1250%', height: '1250%' }}>
+            
+            {/* Hover overlay with actions */}
+            <div className="absolute inset-3 md:inset-4 top-3 md:top-4 bottom-16 md:bottom-20 bg-black/0 group-hover:bg-black/50 rounded-lg transition-all flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 z-10 gap-2">
+              <div className="flex items-center gap-2 text-white font-medium">
+                <Maximize2 className="w-4 h-4" />
+                Büyük Önizle
+              </div>
+              <div className="flex items-center gap-1 text-white/80 text-sm">
+                <Settings2 className="w-3 h-3" />
+                Özelleştir
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md overflow-hidden mb-3 h-48 md:h-56 border border-gray-100">
+              <div className="transform scale-[0.12] origin-top-left" style={{ width: '833%', height: '833%' }}>
                 {template.preview}
               </div>
             </div>
-            <h4 className="text-xs font-medium truncate text-center">{template.name}</h4>
+            
+            <h4 className="font-semibold text-sm md:text-base">{template.name}</h4>
+            <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">{template.description}</p>
           </motion.button>
         ))}
       </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-      {templates.map((template) => (
-        <motion.button
-          key={template.id}
-          whileHover={{ scale: 1.02, y: -4 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setSelectedTemplate(template.id)}
-          className={`relative text-left p-3 md:p-4 rounded-xl border-2 transition-all ${
-            selectedTemplate === template.id
-              ? 'border-accent bg-accent/5 shadow-xl'
-              : 'border-border hover:border-accent/50 hover:shadow-lg'
-          }`}
-        >
-          {selectedTemplate === template.id && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="absolute top-2 right-2 w-6 h-6 bg-accent rounded-full flex items-center justify-center z-10"
-            >
-              <Check className="w-4 h-4 text-accent-foreground" />
-            </motion.div>
-          )}
-          
-          <div className="bg-white rounded-lg shadow-md overflow-hidden mb-3 h-48 md:h-56 border border-gray-100">
-            <div className="transform scale-[0.12] origin-top-left" style={{ width: '833%', height: '833%' }}>
-              {template.preview}
-            </div>
-          </div>
-          
-          <h4 className="font-semibold text-sm md:text-base">{template.name}</h4>
-          <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">{template.description}</p>
-        </motion.button>
-      ))}
-    </div>
+      
+      <TemplateCustomizationModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        templateId={previewTemplate}
+      />
+    </>
   );
 };
 

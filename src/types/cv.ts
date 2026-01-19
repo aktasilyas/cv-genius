@@ -117,6 +117,28 @@ export type CVTemplate = 'modern' | 'classic' | 'minimal' | 'creative' | 'execut
 
 export type CVCreationMode = 'structured' | 'ai-text' | 'linkedin';
 
+export interface TemplateCustomization {
+  primaryColor: string;
+  accentColor: string;
+  textColor: string;
+  backgroundColor: string;
+  fontFamily: 'inter' | 'playfair' | 'roboto' | 'opensans' | 'lato' | 'montserrat';
+  fontSize: 'small' | 'medium' | 'large';
+  spacing: 'compact' | 'normal' | 'relaxed';
+  borderStyle: 'none' | 'subtle' | 'bold';
+}
+
+export const defaultTemplateCustomization: TemplateCustomization = {
+  primaryColor: '#0d9488',
+  accentColor: '#14b8a6',
+  textColor: '#1f2937',
+  backgroundColor: '#ffffff',
+  fontFamily: 'inter',
+  fontSize: 'medium',
+  spacing: 'normal',
+  borderStyle: 'subtle',
+};
+
 export const defaultSectionOrder: SectionOrder[] = [
   { id: 'summary', order: 0 },
   { id: 'experience', order: 1 },

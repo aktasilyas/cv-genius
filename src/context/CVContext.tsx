@@ -11,7 +11,9 @@ import {
   Certificate,
   SectionOrder,
   defaultSectionOrder,
-  defaultSectionVisibility
+  defaultSectionVisibility,
+  TemplateCustomization,
+  defaultTemplateCustomization
 } from '@/types/cv';
 
 interface CVContextType {
@@ -59,6 +61,8 @@ interface CVContextType {
   // Template
   selectedTemplate: CVTemplate;
   setSelectedTemplate: React.Dispatch<React.SetStateAction<CVTemplate>>;
+  templateCustomization: TemplateCustomization;
+  setTemplateCustomization: React.Dispatch<React.SetStateAction<TemplateCustomization>>;
   
   // AI Features
   aiFeedback: AIFeedback[];
@@ -109,6 +113,15 @@ export const CVProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [creationMode, setCreationMode] = useState<CVCreationMode>('structured');
   const [aiTextInput, setAITextInput] = useState('');
   const [isParsingText, setIsParsingText] = useState(false);
+  const [templateCustomization, setTemplateCustomization] = useState<TemplateCustomization>(() => {
+    const saved = localStorage.getItem('template-customization');
+    return saved ? JSON.parse(saved) : defaultTemplateCustomization;
+  });
+
+  // Save template customization to localStorage
+  useEffect(() => {
+    localStorage.setItem('template-customization', JSON.stringify(templateCustomization));
+  }, [templateCustomization]);
 
   // Save to localStorage
   useEffect(() => {
@@ -363,6 +376,8 @@ export const CVProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       setCurrentStep,
       selectedTemplate,
       setSelectedTemplate,
+      templateCustomization,
+      setTemplateCustomization,
       aiFeedback,
       setAIFeedback,
       isAnalyzing,
