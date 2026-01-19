@@ -1,14 +1,15 @@
 import { CVData } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
-import { useSettings } from '@/context/SettingsContext';
+import { Language } from '@/lib/translations';
 
 interface ExecutiveTemplateProps {
   data: CVData;
+  language?: Language;
+  t?: (key: string) => string;
 }
 
-const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data }) => {
+const ExecutiveTemplate: React.FC<ExecutiveTemplateProps> = ({ data, language = 'en', t = (key: string) => key }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
-  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';

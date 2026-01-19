@@ -1,14 +1,15 @@
 import { CVData } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
-import { useSettings } from '@/context/SettingsContext';
+import { Language } from '@/lib/translations';
 
 interface ClassicTemplateProps {
   data: CVData;
+  language?: Language;
+  t?: (key: string) => string;
 }
 
-const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => {
+const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, language = 'en', t = (key: string) => key }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility, sectionOrder } = data;
-  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';

@@ -1,14 +1,15 @@
 import { CVData, SectionOrder } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
-import { useSettings } from '@/context/SettingsContext';
+import { Language } from '@/lib/translations';
 
 interface ModernTemplateProps {
   data: CVData;
+  language?: Language;
+  t?: (key: string) => string;
 }
 
-const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => {
+const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, language = 'en', t = (key: string) => key }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility, sectionOrder } = data;
-  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';

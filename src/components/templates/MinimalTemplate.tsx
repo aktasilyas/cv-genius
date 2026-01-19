@@ -1,14 +1,15 @@
 import { CVData } from '@/types/cv';
 import { Award } from 'lucide-react';
-import { useSettings } from '@/context/SettingsContext';
+import { Language } from '@/lib/translations';
 
 interface MinimalTemplateProps {
   data: CVData;
+  language?: Language;
+  t?: (key: string) => string;
 }
 
-const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data }) => {
+const MinimalTemplate: React.FC<MinimalTemplateProps> = ({ data, language = 'en', t = (key: string) => key }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
-  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';

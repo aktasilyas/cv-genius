@@ -1,14 +1,15 @@
 import { CVData } from '@/types/cv';
 import { Award } from 'lucide-react';
-import { useSettings } from '@/context/SettingsContext';
+import { Language } from '@/lib/translations';
 
 interface TechnicalTemplateProps {
   data: CVData;
+  language?: Language;
+  t?: (key: string) => string;
 }
 
-const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data }) => {
+const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({ data, language = 'en', t = (key: string) => key }) => {
   const { personalInfo, summary, experience, education, skills, languages, certificates, sectionVisibility } = data;
-  const { t, language } = useSettings();
 
   const formatDate = (date: string) => {
     if (!date) return '';
