@@ -44,9 +44,9 @@ export const analyzeCV = async (cvData: CVData, language: string): Promise<Analy
   return data;
 };
 
-export const parseCVText = async (text: string, language: string): Promise<ParseResult> => {
+export const parseCVText = async (text: string, language: string, pdfBase64?: string): Promise<ParseResult> => {
   const { data, error } = await supabase.functions.invoke('parse-cv-text', {
-    body: { text, language }
+    body: { text, language, pdfBase64 }
   });
 
   if (error) {

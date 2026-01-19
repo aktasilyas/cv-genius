@@ -35,33 +35,17 @@ const LinkedInImportPanel = () => {
     }
   };
 
-  const extractTextFromPDF = async (file: File): Promise<string> => {
-    // Read PDF as text - basic extraction
-    // For LinkedIn PDFs, we'll extract text content
+  const readFileAsBase64 = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const text = e.target?.result as string;
-          // Extract readable text from PDF binary
-          // This is a simplified approach - for production, consider a server-side solution
-          const extractedText = text
-            .replace(/[^\x20-\x7E\n\r\tğüşıöçĞÜŞİÖÇ]/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-          
-          if (extractedText.length < 100) {
-            // If extraction is poor, ask user to copy-paste instead
-            reject(new Error(t('linkedin.useManualCopy') || 'Could not extract text. Please copy and paste your LinkedIn content using AI Parse mode.'));
-            return;
-          }
-          resolve(extractedText);
-        } catch (err) {
-          reject(err);
-        }
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove the data URL prefix to get pure base64
+        const base64 = result.split(',')[1];
+        resolve(base64);
       };
       reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsText(file);
+      reader.readAsDataURL(file);
     });
   };
 
@@ -70,15 +54,11 @@ const LinkedInImportPanel = () => {
 
     setIsParsing(true);
     try {
-      // Extract text from PDF
-      const pdfText = await extractTextFromPDF(uploadedFile);
+      // Read PDF as base64 and send to server for parsing
+      const pdfBase64 = await readFileAsBase64(uploadedFile);
       
-      if (!pdfText.trim()) {
-        throw new Error(t('linkedin.emptyPdf') || 'Could not extract text from PDF');
-      }
-
-      // Parse the extracted text using existing AI service
-      const result = await parseCVText(pdfText, language);
+      // Parse the PDF using AI service (server-side extraction)
+      const result = await parseCVText('', language, pdfBase64);
       
       // Save current version before overwriting
       saveVersion('Before LinkedIn Import');
