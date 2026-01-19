@@ -358,6 +358,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'validation.maxLength': 'Maximum {max} characters allowed',
     'validation.pattern': 'Invalid format',
     'field.optional': 'Optional',
+    
+    // Export
+    'export.success': 'PDF exported successfully!',
+    'export.error': 'Failed to export PDF',
   },
   tr: {
     // Navigation
@@ -716,6 +720,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'validation.maxLength': 'En fazla {max} karakter girilebilir',
     'validation.pattern': 'Geçersiz format',
     'field.optional': 'İsteğe bağlı',
+    
+    // Export
+    'export.success': 'PDF başarıyla dışa aktarıldı!',
+    'export.error': 'PDF dışa aktarılamadı',
   },
   de: {
     'nav.templates': 'Vorlagen',
