@@ -29,15 +29,15 @@ const CVPreview = () => {
   };
 
   return (
-    <div className="bg-muted p-4 rounded-xl overflow-auto max-h-[80vh]">
+    <div className="bg-muted p-4 rounded-xl overflow-auto max-h-[85vh]">
       <div 
         className="mx-auto shadow-xl rounded-lg overflow-hidden bg-white"
         style={{ 
           width: '210mm', 
           minHeight: '297mm',
-          transform: 'scale(0.45)',
+          transform: 'scale(0.55)',
           transformOrigin: 'top center',
-          marginBottom: '-40%'
+          marginBottom: '-35%'
         }}
       >
         {renderTemplate()}
