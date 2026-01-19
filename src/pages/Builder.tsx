@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Download, Eye, FileText, Loader2, Settings, 
 import { CVProvider, useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { cvService } from '@/services/cvService';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,6 +24,7 @@ import SectionControlPanel from '@/components/builder/SectionControlPanel';
 import VersionHistoryPanel from '@/components/builder/VersionHistoryPanel';
 import JobMatchPanel from '@/components/builder/JobMatchPanel';
 import SettingsSidebar from '@/components/settings/SettingsSidebar';
+import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
 import ModernTemplate from '@/components/templates/ModernTemplate';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import MinimalTemplate from '@/components/templates/MinimalTemplate';
@@ -338,6 +340,22 @@ const BuilderContent = () => {
 };
 
 const Builder = () => {
+  const { hasCompletedOnboarding, completeOnboarding, getRecommendedTemplate } = useOnboarding();
+  const [showOnboarding, setShowOnboarding] = useState(!hasCompletedOnboarding);
+
+  const handleOnboardingComplete = (answers: any) => {
+    completeOnboarding(answers);
+    setShowOnboarding(false);
+  };
+
+  if (showOnboarding) {
+    return (
+      <CVProvider>
+        <OnboardingFlow onComplete={handleOnboardingComplete} />
+      </CVProvider>
+    );
+  }
+
   return (
     <CVProvider>
       <BuilderContent />
