@@ -92,18 +92,18 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b bg-muted/30">
-          <DialogTitle className="flex items-center gap-2">
-            <Palette className="w-5 h-5 text-primary" />
+      <DialogContent className="max-w-6xl max-h-[90vh] p-0 gap-0 overflow-hidden">
+        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b bg-muted/30">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             {t('template.customize')}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden min-h-0">
           {/* Settings Panel */}
-          <div className="w-80 border-r bg-background flex flex-col">
-            <Tabs defaultValue="colors" className="flex-1 flex flex-col">
+          <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r bg-background flex flex-col max-h-[50vh] lg:max-h-none overflow-hidden">
+            <Tabs defaultValue="colors" className="flex-1 flex flex-col min-h-0">
               <TabsList className="w-full grid grid-cols-3 p-1 m-2 flex-shrink-0">
                 <TabsTrigger value="colors" className="text-xs">
                   <Palette className="w-3 h-3 mr-1" />
@@ -358,12 +358,12 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
             </Tabs>
 
             {/* Action Buttons */}
-            <div className="p-4 border-t bg-muted/30 space-y-2 flex-shrink-0">
-              <Button onClick={handleApply} className="w-full">
+            <div className="p-3 sm:p-4 border-t bg-muted/30 space-y-2 flex-shrink-0">
+              <Button onClick={handleApply} className="w-full" size="sm">
                 <Check className="w-4 h-4 mr-2" />
                 {t('template.applyAndSelect')}
               </Button>
-              <Button variant="outline" onClick={handleReset} className="w-full">
+              <Button variant="outline" onClick={handleReset} className="w-full" size="sm">
                 <RotateCcw className="w-4 h-4 mr-2" />
                 {t('template.resetToDefault')}
               </Button>
@@ -371,28 +371,44 @@ const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProps> = ({
           </div>
 
           {/* Preview Panel */}
-          <div className="flex-1 bg-muted/20 p-6 overflow-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg">{t('template.preview')}</h3>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex-1 bg-muted/20 p-3 sm:p-6 overflow-auto min-h-[200px] lg:min-h-0">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="font-semibold text-sm sm:text-lg">{t('template.preview')}</h3>
+              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                 <Maximize2 className="w-4 h-4" />
                 {t('template.realSizePreview')}
               </div>
             </div>
             
-            <div 
-              className="rounded-lg shadow-2xl mx-auto overflow-hidden"
-              style={{ 
-                width: '210mm', 
-                minHeight: '297mm',
-                maxWidth: '100%',
-                transform: 'scale(0.55)',
-                transformOrigin: 'top center',
-                backgroundColor: localCustomization.backgroundColor,
-              }}
-            >
-              {renderTemplate()}
+            <div className="overflow-auto">
+              <div 
+                className="rounded-lg shadow-2xl mx-auto overflow-hidden"
+                style={{ 
+                  width: 794, 
+                  minHeight: 1123,
+                  transform: 'scale(var(--preview-scale, 0.35))',
+                  transformOrigin: 'top left',
+                  backgroundColor: localCustomization.backgroundColor,
+                }}
+              >
+                {renderTemplate()}
+              </div>
             </div>
+            <style>{`
+              :root {
+                --preview-scale: 0.35;
+              }
+              @media (min-width: 640px) {
+                :root {
+                  --preview-scale: 0.45;
+                }
+              }
+              @media (min-width: 1024px) {
+                :root {
+                  --preview-scale: 0.55;
+                }
+              }
+            `}</style>
           </div>
         </div>
       </DialogContent>
