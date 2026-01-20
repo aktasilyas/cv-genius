@@ -390,25 +390,25 @@ const BuilderContent = () => {
               {/* Right Panel - Preview */}
               <div className={`lg:col-span-3 space-y-4 ${mobileView === 'form' ? 'hidden lg:block' : ''}`}>
                 <Tabs value={rightPanel} onValueChange={(v) => setRightPanel(v as any)} className="space-y-4">
-                  <TabsList className="flex flex-wrap gap-1 h-auto p-1 sm:grid sm:grid-cols-5 sm:h-10">
-                    <TabsTrigger value="preview" className="flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 gap-1 text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-0">
-                      <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <TabsList className="grid grid-cols-5 h-9 sm:h-10">
+                    <TabsTrigger value="preview" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <Eye className="w-4 h-4" />
                       <span className="hidden sm:inline">{t('tab.preview') || 'Preview'}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="ai" className="flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 gap-1 text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-0">
-                      <Wand2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <TabsTrigger value="ai" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <Wand2 className="w-4 h-4" />
                       <span className="hidden sm:inline">{t('tab.ai') || 'AI'}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="job" className="flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 gap-1 text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-0">
-                      <Briefcase className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <TabsTrigger value="job" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <Briefcase className="w-4 h-4" />
                       <span className="hidden sm:inline">{t('tab.job') || 'Job'}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="sections" className="flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 gap-1 text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-0">
-                      <Layers className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <TabsTrigger value="sections" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <Layers className="w-4 h-4" />
                       <span className="hidden sm:inline">{t('tab.sections') || 'Sections'}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="history" className="flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 gap-1 text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-0">
-                      <History className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <TabsTrigger value="history" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+                      <History className="w-4 h-4" />
                       <span className="hidden sm:inline">{t('tab.history') || 'History'}</span>
                     </TabsTrigger>
                   </TabsList>
