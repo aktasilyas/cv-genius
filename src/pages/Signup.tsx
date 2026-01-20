@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Loader2, ArrowRight, FileText, Check } from 'lucide-react';
+import { Mail, Lock, User, Loader2, ArrowRight, FileText, Check, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/context/SettingsContext';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,33 @@ const Signup = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [errors, setErrors] = useState<{ fullName?: string; email?: string; password?: string }>({});
+
+  const validateForm = () => {
+    const newErrors: { fullName?: string; email?: string; password?: string } = {};
+    
+    if (!fullName.trim()) {
+      newErrors.fullName = t('auth.fullNameRequired') || 'Full name is required';
+    }
+    
+    if (!email) {
+      newErrors.email = t('auth.emailRequired') || 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = t('auth.invalidEmail') || 'Please enter a valid email';
+    }
+    
+    if (!password) {
+      newErrors.password = t('auth.passwordRequired') || 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = t('auth.passwordMinLength') || 'Password must be at least 6 characters';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -30,8 +55,7 @@ const Signup = () => {
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password.length < 6) {
-      toast.error(t('auth.passwordMinLength') || 'Password must be at least 6 characters');
+    if (!validateForm()) {
       return;
     }
 
@@ -217,9 +241,13 @@ const Signup = () => {
                   type="text"
                   placeholder="John Doe"
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    if (errors.fullName) setErrors(prev => ({ ...prev, fullName: undefined }));
+                  }}
                   className="h-12 pl-11"
-                  required
+                  error={errors.fullName}
+                  touched={!!errors.fullName}
                 />
               </div>
             </div>
@@ -235,9 +263,13 @@ const Signup = () => {
                   type="email"
                   placeholder="name@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+                  }}
                   className="h-12 pl-11"
-                  required
+                  error={errors.email}
+                  touched={!!errors.email}
                 />
               </div>
             </div>
@@ -250,14 +282,24 @@ const Signup = () => {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 pl-11"
-                  required
-                  minLength={6}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                  }}
+                  className="h-12 pl-11 pr-11"
+                  error={errors.password}
+                  touched={!!errors.password}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
               <p className="text-xs text-muted-foreground">
                 {t('auth.passwordHint') || 'Must be at least 6 characters'}
