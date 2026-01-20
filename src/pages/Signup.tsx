@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Loader2, ArrowRight, FileText, Check } from 'lucide-react';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const Signup = () => {
-  const { signUpWithEmail, signInWithGoogle, isAuthenticated } = useAuth();
+  const { signUpWithEmail, signInWithGoogle, isAuthenticated, loading: authLoading } = useAuth();
   const { t } = useSettings();
   const navigate = useNavigate();
   
@@ -21,10 +21,11 @@ const Signup = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // Redirect if already authenticated
-  if (isAuthenticated) {
-    navigate('/builder');
-    return null;
-  }
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/builder');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,12 +38,15 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      await signUpWithEmail(email, password, fullName);
-      toast.success(t('auth.signupSuccess') || 'Account created successfully!');
-      navigate('/builder');
+      const result = await signUpWithEmail(email, password, fullName);
+      if (result?.user) {
+        toast.success(t('auth.signupSuccess') || 'Account created successfully!');
+        navigate('/builder');
+      }
     } catch (error: any) {
       console.error('Signup error:', error);
-      toast.error(error.message || t('auth.signupError') || 'Failed to create account');
+      const message = error?.message || t('auth.signupError') || 'Failed to create account';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -55,10 +59,18 @@ const Signup = () => {
     } catch (error: any) {
       console.error('Google signup error:', error);
       toast.error(error.message || 'Failed to sign up with Google');
-    } finally {
       setIsGoogleLoading(false);
     }
   };
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const features = [
     t('auth.feature1') || 'AI-powered CV analysis',
