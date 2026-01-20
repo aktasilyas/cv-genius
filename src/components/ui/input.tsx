@@ -17,23 +17,23 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           type={type}
           className={cn(
             // Base styles - modern and soft
-            "flex h-11 w-full rounded-xl border-2 bg-secondary/30 px-4 py-2.5 text-base",
+            "flex h-11 w-full rounded-xl border-2 bg-background px-4 py-2.5 text-base",
             // Placeholder and text
             "placeholder:text-muted-foreground/60 text-foreground",
             // Transitions
             "transition-all duration-200 ease-out",
             // Focus styles - soft glow
-            "focus:outline-none focus:border-primary/50 focus:bg-background focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.1)]",
+            "focus:outline-none focus:border-primary focus:bg-background focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.1)]",
             // Hover
-            "hover:border-border/80 hover:bg-secondary/50",
+            "hover:border-primary/40 hover:bg-background",
             // Disabled
-            "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-secondary/30",
+            "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-background",
             // File input
             "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
             // Error state
-            hasError && "border-destructive/50 focus:border-destructive focus:shadow-[0_0_0_4px_hsl(var(--destructive)/0.1)]",
-            // Normal border
-            !hasError && "border-border/40",
+            hasError && "border-destructive focus:border-destructive focus:shadow-[0_0_0_4px_hsl(var(--destructive)/0.1)]",
+            // Normal border - more visible in light mode
+            !hasError && "border-input shadow-sm",
             // Size for text
             "md:text-sm",
             className,
