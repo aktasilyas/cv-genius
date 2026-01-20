@@ -28,8 +28,6 @@ export const useAuth = () => {
   }, []);
 
   const signInWithGoogle = async () => {
-    // In embedded previews, Google blocks OAuth flows inside iframes.
-    // Use skipBrowserRedirect and open the consent screen in a new tab.
     const redirectTo = window.location.origin;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -61,6 +59,32 @@ export const useAuth = () => {
     window.location.assign(url);
   };
 
+  const signInWithEmail = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+    return data;
+  };
+
+  const signUpWithEmail = async (email: string, password: string, fullName?: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+
+    if (error) throw error;
+    return data;
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -71,6 +95,8 @@ export const useAuth = () => {
     session,
     loading,
     signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
     signOut,
     isAuthenticated: !!user
   };
