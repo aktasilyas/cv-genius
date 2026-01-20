@@ -109,7 +109,7 @@ const Login = () => {
               <div className="w-12 h-12 rounded-xl bg-primary-foreground/10 flex items-center justify-center">
                 <FileText className="w-7 h-7 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold text-primary-foreground">CV Builder</span>
+              <span className="text-2xl font-bold text-primary-foreground">CVCraft</span>
             </Link>
             
             <h1 className="text-4xl xl:text-5xl font-bold text-primary-foreground mb-6 leading-tight">
@@ -147,7 +147,7 @@ const Login = () => {
             <div className="w-10 h-10 rounded-lg bg-primary-foreground/10 flex items-center justify-center">
               <FileText className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-primary-foreground">CV Builder</span>
+            <span className="text-xl font-bold text-primary-foreground">CVCraft</span>
           </Link>
           <h1 className="mt-4 text-2xl font-bold text-primary-foreground">
             {t('auth.signIn') || 'Sign in'}

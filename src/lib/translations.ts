@@ -119,6 +119,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'placeholder.skill': 'e.g., JavaScript',
     'placeholder.description': 'Describe your responsibilities and achievements. Use bullet points for better readability.',
     'placeholder.summary': 'Passionate software engineer with 5+ years of experience in building scalable web applications...',
+    'placeholder.fullName': 'John Doe',
     
     // Summary tips
     'summary.charactersRecommended': 'characters recommended',
@@ -262,6 +263,13 @@ export const translations: Record<Language, Record<string, string>> = {
     'job.missingKeywords': 'Missing Keywords',
     'job.suggestions': 'Optimization Tips',
     
+    // Tab names
+    'tab.preview': 'Preview',
+    'tab.ai': 'AI',
+    'tab.job': 'Job Match',
+    'tab.sections': 'Sections',
+    'tab.history': 'History',
+    
     // Section Controls
     'section.title': 'Section Controls',
     'section.description': 'Toggle visibility and drag to reorder sections',
@@ -326,6 +334,26 @@ export const translations: Record<Language, Record<string, string>> = {
     'template.preview': 'Preview',
     'template.previewLarge': 'View Large',
     'template.realSizePreview': 'Real size preview',
+    
+    // Templates page
+    'templates.pageTitle': 'Choose Your Template',
+    'templates.pageSubtitle': 'Select from our professionally designed templates. Each one is ATS-friendly and optimized for success.',
+    'templates.startBuilding': 'Start Building',
+    'templates.startBuildingCV': 'Start Building Your CV',
+    
+    // Template sample names (for previews)
+    'sample.name1': 'John Smith',
+    'sample.title1': 'Senior Software Engineer',
+    'sample.name2': 'Jane Williams',
+    'sample.title2': 'Marketing Director',
+    'sample.name3': 'Alex Chen',
+    'sample.title3': 'Product Designer',
+    'sample.name4': 'Sarah Johnson',
+    'sample.title4': 'Creative Director',
+    'sample.name5': 'Michael Brown',
+    'sample.title5': 'Chief Executive Officer',
+    'sample.name6': 'David Lee',
+    'sample.title6': 'Full Stack Developer',
     
     // Template sections
     'cv.summary': 'Professional Summary',
@@ -541,6 +569,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'placeholder.skill': 'örn., JavaScript',
     'placeholder.description': 'Sorumluluklarınızı ve başarılarınızı açıklayın. Daha iyi okunabilirlik için madde işaretleri kullanın.',
     'placeholder.summary': '5+ yıllık deneyime sahip tutkulu yazılım mühendisi, ölçeklenebilir web uygulamaları geliştirmede uzman...',
+    'placeholder.fullName': 'Ahmet Yılmaz',
     
     // Summary tips
     'summary.charactersRecommended': 'karakter önerilir',
@@ -684,6 +713,13 @@ export const translations: Record<Language, Record<string, string>> = {
     'job.missingKeywords': 'Eksik Anahtar Kelimeler',
     'job.suggestions': 'Optimizasyon İpuçları',
     
+    // Tab names
+    'tab.preview': 'Önizleme',
+    'tab.ai': 'AI',
+    'tab.job': 'İş Eşleşme',
+    'tab.sections': 'Bölümler',
+    'tab.history': 'Geçmiş',
+    
     // Section Controls
     'section.title': 'Bölüm Kontrolleri',
     'section.description': 'Bölümleri sürükleyerek sıralayın ve görünürlüğü değiştirin',
@@ -748,6 +784,26 @@ export const translations: Record<Language, Record<string, string>> = {
     'template.preview': 'Önizle',
     'template.previewLarge': 'Büyük Önizle',
     'template.realSizePreview': 'Gerçek boyut önizlemesi',
+    
+    // Templates page
+    'templates.pageTitle': 'Şablonunuzu Seçin',
+    'templates.pageSubtitle': 'Profesyonelce tasarlanmış şablonlarımızdan seçin. Her biri ATS uyumlu ve başarı için optimize edilmiştir.',
+    'templates.startBuilding': 'Oluşturmaya Başla',
+    'templates.startBuildingCV': "CV'nizi Oluşturmaya Başlayın",
+    
+    // Template sample names (for previews)
+    'sample.name1': 'Ahmet Yılmaz',
+    'sample.title1': 'Kıdemli Yazılım Mühendisi',
+    'sample.name2': 'Ayşe Kaya',
+    'sample.title2': 'Pazarlama Direktörü',
+    'sample.name3': 'Mehmet Demir',
+    'sample.title3': 'Ürün Tasarımcısı',
+    'sample.name4': 'Zeynep Öztürk',
+    'sample.title4': 'Kreatif Direktör',
+    'sample.name5': 'Mustafa Çelik',
+    'sample.title5': 'Genel Müdür',
+    'sample.name6': 'Emre Aydın',
+    'sample.title6': 'Full Stack Geliştirici',
     
     // Template sections
     'cv.summary': 'Profesyonel Özet',
