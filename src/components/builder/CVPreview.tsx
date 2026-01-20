@@ -22,17 +22,39 @@ const CVPreview = () => {
     const el = containerRef.current;
     if (!el) return;
 
+    let raf = 0;
+    const timeoutIds: number[] = [];
+
     const update = () => {
-      const width = el.clientWidth;
+      const width = el.getBoundingClientRect().width || el.clientWidth;
       // Keep some padding to avoid edge clipping
-      const next = clamp((width - 8) / A4_PX.width, 0.28, 1);
+      const next = clamp((width - 8) / A4_PX.width, 0.3, 1);
       setScale(Number(next.toFixed(3)));
     };
 
+    const scheduleUpdate = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+
+    // Initial + a few retries (some mobile browsers don't fire ResizeObserver on display toggles)
     update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
+    [50, 150, 400].forEach((ms) => timeoutIds.push(window.setTimeout(update, ms)));
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(scheduleUpdate);
+      ro.observe(el);
+    }
+
+    window.addEventListener('resize', scheduleUpdate, { passive: true });
+
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', scheduleUpdate);
+      cancelAnimationFrame(raf);
+      timeoutIds.forEach((id) => window.clearTimeout(id));
+    };
   }, []);
 
   const scaledSize = useMemo(
@@ -68,7 +90,7 @@ const CVPreview = () => {
     <div className="bg-muted p-2 sm:p-4 rounded-xl overflow-hidden w-full">
       <div
         ref={containerRef}
-        className="overflow-auto max-h-[60vh] sm:max-h-[75vh] lg:max-h-[85vh]"
+        className="overflow-auto h-[60vh] sm:h-[70vh] lg:h-[80vh]"
       >
         {/*
           Wrapper has the *scaled* size so the page layout never overflows,
