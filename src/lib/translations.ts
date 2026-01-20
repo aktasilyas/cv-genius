@@ -48,6 +48,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'builder.certificatesDesc': 'Add your professional certifications',
     'builder.summary': 'Professional Summary',
     'builder.summaryDesc': 'Write a compelling summary that highlights your key qualifications and career goals',
+    'builder.form': 'Form',
+    'builder.preview': 'Preview',
     
     // Form fields
     'field.fullName': 'Full Name',
@@ -468,6 +470,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'builder.certificatesDesc': 'Profesyonel sertifikalarınızı ekleyin',
     'builder.summary': 'Profesyonel Özet',
     'builder.summaryDesc': 'Temel niteliklerinizi ve kariyer hedeflerinizi vurgulayan etkileyici bir özet yazın',
+    'builder.form': 'Form',
+    'builder.preview': 'Önizleme',
     
     // Form fields
     'field.fullName': 'Ad Soyad',

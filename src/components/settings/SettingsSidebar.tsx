@@ -26,7 +26,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ isOpen, onClose }) =>
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-[320px] sm:w-[400px] overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:w-[320px] md:w-[400px] overflow-y-auto p-4 sm:p-6">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-xl font-display">{t('settings.title') || 'Settings'}</SheetTitle>
         </SheetHeader>

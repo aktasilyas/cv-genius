@@ -132,17 +132,17 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
-              <FileText className="w-5 h-5 text-accent-foreground" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent flex items-center justify-center">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-accent-foreground" />
             </div>
-            <span className="text-xl font-display font-semibold">CVCraft</span>
+            <span className="text-lg sm:text-xl font-display font-semibold hidden xs:inline">CVCraft</span>
           </Link>
 
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
-              <Settings className="w-5 h-5" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="w-8 h-8 sm:w-9 sm:h-9">
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
             <AuthButton />
           </div>
@@ -151,17 +151,18 @@ const Dashboard = () => {
 
       <SettingsSidebar isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-display font-bold">
+            <h1 className="text-2xl sm:text-3xl font-display font-bold">
               {t('dashboard.title') || 'My CVs'}
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               {t('dashboard.subtitle') || 'Manage and edit your resumes'}
             </p>
           </div>
-          <Button variant="accent" onClick={handleCreateNew} className="gap-2">
+          <Button variant="accent" onClick={handleCreateNew} className="gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
             {t('dashboard.createNew') || 'Create New CV'}
           </Button>
@@ -175,15 +176,15 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-20"
+            className="text-center py-12 sm:py-20"
           >
-            <div className="w-20 h-20 rounded-full bg-secondary mx-auto mb-6 flex items-center justify-center">
-              <FileText className="w-10 h-10 text-muted-foreground" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-secondary mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+              <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">
               {t('dashboard.empty') || 'No CVs yet'}
             </h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-4">
               {t('dashboard.emptyDesc') || 'Create your first CV to get started'}
             </p>
             <Button variant="accent" onClick={handleCreateNew} className="gap-2">
@@ -192,7 +193,7 @@ const Dashboard = () => {
             </Button>
           </motion.div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {cvs.map((cv, index) => (
               <motion.div
                 key={cv.id}
@@ -201,21 +202,21 @@ const Dashboard = () => {
                 transition={{ delay: index * 0.05 }}
               >
                 <Card className="group hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg flex items-center gap-2">
+                      <CardTitle className="text-base sm:text-lg flex items-center gap-2 truncate pr-2">
                         {cv.title}
                         {cv.is_default && (
-                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
                         )}
                       </CardTitle>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-popover border shadow-lg">
+                        <DropdownMenuContent align="end" className="bg-popover border shadow-lg z-50">
                           <DropdownMenuItem onClick={() => handleEdit(cv)}>
                             <Edit className="w-4 h-4 mr-2" />
                             {t('dashboard.edit') || 'Edit'}
@@ -240,22 +241,22 @@ const Dashboard = () => {
                       </DropdownMenu>
                     </div>
                   </CardHeader>
-                  <CardContent className="pb-2">
+                  <CardContent className="pb-2 px-3 sm:px-6">
                     <div className="aspect-[210/297] bg-secondary rounded-lg overflow-hidden mb-3 relative">
                       <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                        <FileText className="w-12 h-12" />
+                        <FileText className="w-10 h-10 sm:w-12 sm:h-12" />
                       </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      <p>{cv.cv_data.personalInfo?.fullName || t('dashboard.unnamed') || 'Unnamed'}</p>
+                    <div className="text-xs sm:text-sm text-muted-foreground">
+                      <p className="truncate">{cv.cv_data.personalInfo?.fullName || t('dashboard.unnamed') || 'Unnamed'}</p>
                       <p className="capitalize">{cv.selected_template} {t('dashboard.template') || 'template'}</p>
                     </div>
                   </CardContent>
-                  <CardFooter className="pt-2 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
+                  <CardFooter className="pt-2 px-3 sm:px-6 pb-3 sm:pb-6 flex items-center justify-between">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">
                       {t('dashboard.updated') || 'Updated'}: {formatDate(cv.updated_at)}
                     </span>
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(cv)}>
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(cv)} className="text-xs sm:text-sm h-8">
                       {t('dashboard.open') || 'Open'}
                     </Button>
                   </CardFooter>
