@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Crown, 
   X, 
@@ -11,13 +11,16 @@ import {
   Briefcase, 
   History,
   Zap,
-  Shield
+  Shield,
+  Bell
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSettings } from '@/context/SettingsContext';
 import { PRICING } from '@/types/subscription';
+import { isWaitlistMode } from '@/types/waitlist';
+import WaitlistModal from '@/components/waitlist/WaitlistModal';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -28,6 +31,19 @@ interface UpgradeModalProps {
 const UpgradeModal = ({ isOpen, onClose, feature }: UpgradeModalProps) => {
   const { t, language } = useSettings();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
+  const [showWaitlist, setShowWaitlist] = useState(false);
+
+  // In waitlist mode, redirect to waitlist modal
+  if (isWaitlistMode()) {
+    return (
+      <WaitlistModal 
+        isOpen={isOpen} 
+        onClose={onClose} 
+        feature={feature}
+        source="upgrade-modal"
+      />
+    );
+  }
 
   const features = [
     { icon: FileText, text: t('premium.allTemplates') || 'All 6 Premium Templates', free: '2', premium: '6' },
@@ -173,7 +189,7 @@ const UpgradeModal = ({ isOpen, onClose, feature }: UpgradeModalProps) => {
           <Button 
             className="w-full h-12 text-lg gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
             onClick={() => {
-              // TODO: Integrate Stripe checkout
+              // TODO: Integrate payment checkout
               console.log('Upgrade to premium:', billingPeriod);
             }}
           >

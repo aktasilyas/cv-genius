@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Settings2, Maximize2, Crown, Lock } from 'lucide-react';
+import { Check, Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Settings2, Maximize2, Crown, Lock, Bell } from 'lucide-react';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useSubscriptionContext } from '@/context/SubscriptionContext';
 import { CVTemplate } from '@/types/cv';
 import { FREE_TEMPLATES, PREMIUM_TEMPLATES } from '@/types/subscription';
+import { isWaitlistMode } from '@/types/waitlist';
 import TemplateCustomizationModal from './TemplateCustomizationModal';
-import UpgradeModal from '@/components/subscription/UpgradeModal';
+import WaitlistModal from '@/components/waitlist/WaitlistModal';
 import PremiumBadge from '@/components/subscription/PremiumBadge';
 
 interface TemplateSelectorProps {
@@ -20,13 +21,14 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
   const { canUseTemplate, isPremium } = useSubscriptionContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<CVTemplate>('modern');
-  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showWaitlist, setShowWaitlist] = useState(false);
   const [lockedTemplateName, setLockedTemplateName] = useState('');
 
   const handleTemplateClick = (templateId: CVTemplate, templateName: string) => {
-    if (!canUseTemplate(templateId)) {
+    // In waitlist mode, allow all templates for preview
+    if (!isWaitlistMode() && !canUseTemplate(templateId)) {
       setLockedTemplateName(templateName);
-      setShowUpgrade(true);
+      setShowWaitlist(true);
       return;
     }
     setPreviewTemplate(templateId);
@@ -34,6 +36,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
   };
 
   const isTemplateLocked = (templateId: CVTemplate): boolean => {
+    // In waitlist mode, no templates are locked for preview
+    if (isWaitlistMode()) return false;
     return !canUseTemplate(templateId);
   };
 
@@ -387,10 +391,11 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
           onOpenChange={setModalOpen}
           templateId={previewTemplate}
         />
-        <UpgradeModal 
-          isOpen={showUpgrade} 
-          onClose={() => setShowUpgrade(false)} 
+        <WaitlistModal 
+          isOpen={showWaitlist} 
+          onClose={() => setShowWaitlist(false)} 
           feature={lockedTemplateName}
+          source="template-selector"
         />
       </>
     );
@@ -476,10 +481,11 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
         onOpenChange={setModalOpen}
         templateId={previewTemplate}
       />
-      <UpgradeModal 
-        isOpen={showUpgrade} 
-        onClose={() => setShowUpgrade(false)} 
+      <WaitlistModal 
+        isOpen={showWaitlist} 
+        onClose={() => setShowWaitlist(false)} 
         feature={lockedTemplateName}
+        source="template-selector"
       />
     </>
   );

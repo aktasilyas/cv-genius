@@ -6,6 +6,7 @@ import { useSettings } from '@/context/SettingsContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { cvService } from '@/services/cvService';
+import { isWaitlistMode, isFeatureRestricted } from '@/types/waitlist';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PersonalInfoStep from '@/components/wizard/PersonalInfoStep';
@@ -25,6 +26,7 @@ import VersionHistoryPanel from '@/components/builder/VersionHistoryPanel';
 import JobMatchPanel from '@/components/builder/JobMatchPanel';
 import SettingsSidebar from '@/components/settings/SettingsSidebar';
 import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
+import WaitlistModal from '@/components/waitlist/WaitlistModal';
 import ModernTemplate from '@/components/templates/ModernTemplate';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import MinimalTemplate from '@/components/templates/MinimalTemplate';
@@ -56,6 +58,7 @@ const BuilderContent = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [rightPanel, setRightPanel] = useState<'preview' | 'ai' | 'job' | 'sections' | 'history'>('preview');
   const [editingCVId, setEditingCVId] = useState<string | null>(null);
+  const [showWaitlist, setShowWaitlist] = useState(false);
 
   useEffect(() => {
     const savedId = localStorage.getItem('editing-cv-id');
@@ -80,9 +83,15 @@ const BuilderContent = () => {
   };
 
   const exportToPDF = async () => {
+    // In waitlist mode, show waitlist modal for watermark-free export
+    if (isFeatureRestricted('pdfExport')) {
+      setShowWaitlist(true);
+      return;
+    }
+    
     setIsExporting(true);
-    try {
       
+    try {
       // Find the preview element directly from DOM
       const previewElement = document.getElementById('cv-preview-content');
       
@@ -241,6 +250,12 @@ const BuilderContent = () => {
       </header>
       
       <SettingsSidebar isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <WaitlistModal 
+        isOpen={showWaitlist} 
+        onClose={() => setShowWaitlist(false)} 
+        feature={t('premium.noWatermark') || 'Watermark-Free PDF Export'}
+        source="pdf-export"
+      />
 
       {/* Mobile Creation Mode Toggle */}
       <div className="lg:hidden container mx-auto px-2 pt-3">
