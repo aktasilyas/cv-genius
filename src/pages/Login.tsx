@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Loader2, ArrowRight, FileText } from 'lucide-react';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const Login = () => {
-  const { signInWithEmail, signInWithGoogle, isAuthenticated } = useAuth();
+  const { signInWithEmail, signInWithGoogle, isAuthenticated, loading: authLoading } = useAuth();
   const { t } = useSettings();
   const navigate = useNavigate();
   
@@ -20,19 +20,22 @@ const Login = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // Redirect if already authenticated
-  if (isAuthenticated) {
-    navigate('/builder');
-    return null;
-  }
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/builder');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      await signInWithEmail(email, password);
-      toast.success(t('auth.loginSuccess') || 'Welcome back!');
-      navigate('/builder');
+      const result = await signInWithEmail(email, password);
+      if (result?.user) {
+        toast.success(t('auth.loginSuccess') || 'Welcome back!');
+        navigate('/builder');
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(error.message || t('auth.loginError') || 'Failed to sign in');
@@ -48,10 +51,18 @@ const Login = () => {
     } catch (error: any) {
       console.error('Google login error:', error);
       toast.error(error.message || 'Failed to sign in with Google');
-    } finally {
       setIsGoogleLoading(false);
     }
   };
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
