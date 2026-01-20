@@ -90,8 +90,8 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left side - Branding */}
+    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
+      {/* Left side - Branding (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
         
@@ -140,41 +140,63 @@ const Login = () => {
       </div>
 
       {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-full max-w-md"
-        >
-          {/* Mobile logo */}
-          <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+      <div className="w-full lg:w-1/2 flex flex-col min-h-screen lg:min-h-0">
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-primary px-4 py-6 safe-area-inset-top">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-lg bg-primary-foreground/10 flex items-center justify-center">
               <FileText className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CV Builder</span>
+            <span className="text-xl font-bold text-primary-foreground">CV Builder</span>
           </Link>
+          <h1 className="mt-4 text-2xl font-bold text-primary-foreground">
+            {t('auth.signIn') || 'Sign in'}
+          </h1>
+          <p className="mt-1 text-primary-foreground/70 text-sm">
+            {t('auth.loginSubtitle') || 'Continue crafting your perfect CV'}
+          </p>
+        </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-              {t('auth.signIn') || 'Sign in'}
-            </h2>
-            <p className="text-muted-foreground">
-              {t('auth.noAccount') || "Don't have an account?"}{' '}
-              <Link to="/signup" className="text-primary font-medium hover:underline">
-                {t('auth.signUpLink') || 'Sign up'}
-              </Link>
-            </p>
-          </div>
-
-          {/* Google Sign In */}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full h-12 mb-6 gap-3 text-base"
-            onClick={handleGoogleLogin}
-            disabled={isGoogleLoading}
+        {/* Form Content */}
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="w-full max-w-md"
           >
+
+            {/* Desktop Title */}
+            <div className="mb-6 lg:mb-8 hidden lg:block">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+                {t('auth.signIn') || 'Sign in'}
+              </h2>
+              <p className="text-muted-foreground">
+                {t('auth.noAccount') || "Don't have an account?"}{' '}
+                <Link to="/signup" className="text-primary font-medium hover:underline">
+                  {t('auth.signUpLink') || 'Sign up'}
+                </Link>
+              </p>
+            </div>
+
+            {/* Mobile subtitle */}
+            <div className="mb-6 lg:hidden">
+              <p className="text-muted-foreground text-sm">
+                {t('auth.noAccount') || "Don't have an account?"}{' '}
+                <Link to="/signup" className="text-primary font-medium hover:underline">
+                  {t('auth.signUpLink') || 'Sign up'}
+                </Link>
+              </p>
+            </div>
+
+            {/* Google Sign In */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 sm:h-12 mb-4 sm:mb-6 gap-2 sm:gap-3 text-sm sm:text-base"
+              onClick={handleGoogleLogin}
+              disabled={isGoogleLoading}
+            >
             {isGoogleLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
@@ -200,106 +222,107 @@ const Login = () => {
             {t('auth.continueWithGoogle') || 'Continue with Google'}
           </Button>
 
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-background text-muted-foreground">
-                {t('auth.orContinueWith') || 'or continue with email'}
-              </span>
-            </div>
-          </div>
-
-          {/* Email Form */}
-          <form onSubmit={handleEmailLogin} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                {t('auth.email') || 'Email'}
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
-                  }}
-                  className="h-12 pl-11"
-                  error={errors.email}
-                  touched={!!errors.email}
-                />
+            {/* Divider */}
+            <div className="relative mb-4 sm:mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs sm:text-sm">
+                <span className="px-3 sm:px-4 bg-background text-muted-foreground">
+                  {t('auth.orContinueWith') || 'or continue with email'}
+                </span>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  {t('auth.password') || 'Password'}
+            {/* Email Form */}
+            <form onSubmit={handleEmailLogin} className="space-y-4 sm:space-y-5">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="email" className="text-xs sm:text-sm font-medium">
+                  {t('auth.email') || 'Email'}
                 </Label>
-                <Link 
-                  to="/forgot-password" 
-                  className="text-sm text-primary hover:underline"
-                >
-                  {t('auth.forgotPassword') || 'Forgot password?'}
-                </Link>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+                    }}
+                    className="h-10 sm:h-12 pl-10 sm:pl-11 text-sm sm:text-base"
+                    error={errors.email}
+                    touched={!!errors.email}
+                  />
+                </div>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
-                  }}
-                  className="h-12 pl-11 pr-11"
-                  error={errors.password}
-                  touched={!!errors.password}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 text-base gap-2"
-              disabled={isLoading}
-            >
+              <div className="space-y-1.5 sm:space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
+                    {t('auth.password') || 'Password'}
+                  </Label>
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-xs sm:text-sm text-primary hover:underline"
+                  >
+                    {t('auth.forgotPassword') || 'Forgot password?'}
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                    }}
+                    className="h-10 sm:h-12 pl-10 sm:pl-11 pr-10 sm:pr-11 text-sm sm:text-base"
+                    error={errors.password}
+                    touched={!!errors.password}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-10 sm:h-12 text-sm sm:text-base gap-2"
+                disabled={isLoading}
+              >
               {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  {t('auth.signIn') || 'Sign in'}
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </Button>
-          </form>
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                ) : (
+                  <>
+                    {t('auth.signIn') || 'Sign in'}
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </>
+                )}
+              </Button>
+            </form>
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            {t('auth.termsText') || 'By signing in, you agree to our'}{' '}
-            <Link to="/terms" className="text-primary hover:underline">
-              {t('auth.terms') || 'Terms of Service'}
-            </Link>{' '}
-            {t('auth.and') || 'and'}{' '}
-            <Link to="/privacy" className="text-primary hover:underline">
-              {t('auth.privacy') || 'Privacy Policy'}
-            </Link>
-          </p>
-        </motion.div>
+            <p className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-muted-foreground">
+              {t('auth.termsText') || 'By signing in, you agree to our'}{' '}
+              <Link to="/terms" className="text-primary hover:underline">
+                {t('auth.terms') || 'Terms of Service'}
+              </Link>{' '}
+              {t('auth.and') || 'and'}{' '}
+              <Link to="/privacy" className="text-primary hover:underline">
+                {t('auth.privacy') || 'Privacy Policy'}
+              </Link>
+            </p>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
