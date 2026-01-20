@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
 import ModernTemplate from '@/components/templates/ModernTemplate';
@@ -7,13 +8,44 @@ import CreativeTemplate from '@/components/templates/CreativeTemplate';
 import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
 import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
 
+const A4_PX = { width: 794, height: 1123 };
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
 const CVPreview = () => {
   const { cvData, selectedTemplate, templateCustomization } = useCVContext();
   const { language, t } = useSettings();
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(0.4);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const width = el.clientWidth;
+      // Keep some padding to avoid edge clipping
+      const next = clamp((width - 8) / A4_PX.width, 0.28, 1);
+      setScale(Number(next.toFixed(3)));
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const scaledSize = useMemo(
+    () => ({
+      width: Math.round(A4_PX.width * scale),
+      height: Math.round(A4_PX.height * scale),
+    }),
+    [scale]
+  );
+
   const renderTemplate = () => {
     const templateProps = { data: cvData, language, t, customization: templateCustomization };
-    
+
     switch (selectedTemplate) {
       case 'modern':
         return <ModernTemplate {...templateProps} />;
@@ -34,48 +66,30 @@ const CVPreview = () => {
 
   return (
     <div className="bg-muted p-2 sm:p-4 rounded-xl overflow-hidden w-full">
-      <div className="overflow-auto max-h-[60vh] sm:max-h-[75vh] lg:max-h-[85vh]">
-        <div 
-          id="cv-preview-content"
-          className="mx-auto shadow-xl rounded-lg overflow-hidden bg-white origin-top-left sm:origin-top"
-          style={{ 
-            width: '210mm', 
-            minHeight: '297mm',
-            transform: 'scale(var(--cv-scale, 0.35))',
-            transformOrigin: 'top left',
-          }}
-        >
-          {renderTemplate()}
+      <div
+        ref={containerRef}
+        className="overflow-auto max-h-[60vh] sm:max-h-[75vh] lg:max-h-[85vh]"
+      >
+        {/*
+          Wrapper has the *scaled* size so the page layout never overflows,
+          while the inner A4 canvas is scaled via transform.
+        */}
+        <div className="mx-auto" style={{ width: scaledSize.width, height: scaledSize.height }}>
+          <div
+            id="cv-preview-content"
+            className="shadow-xl rounded-lg overflow-hidden bg-white"
+            style={{
+              width: A4_PX.width,
+              minHeight: A4_PX.height,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+              willChange: 'transform',
+            }}
+          >
+            {renderTemplate()}
+          </div>
         </div>
       </div>
-      <style>{`
-        :root {
-          --cv-scale: 0.32;
-        }
-        @media (min-width: 400px) {
-          :root {
-            --cv-scale: 0.38;
-          }
-        }
-        @media (min-width: 640px) {
-          :root {
-            --cv-scale: 0.45;
-          }
-          #cv-preview-content {
-            transform-origin: top center !important;
-          }
-        }
-        @media (min-width: 1024px) {
-          :root {
-            --cv-scale: 0.55;
-          }
-        }
-        @media (min-width: 1280px) {
-          :root {
-            --cv-scale: 0.65;
-          }
-        }
-      `}</style>
     </div>
   );
 };
