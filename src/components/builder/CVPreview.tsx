@@ -33,34 +33,46 @@ const CVPreview = () => {
   };
 
   return (
-    <div className="bg-muted p-2 sm:p-4 rounded-xl overflow-auto max-h-[70vh] sm:max-h-[85vh]">
-      <div 
-        id="cv-preview-content"
-        className="mx-auto shadow-xl rounded-lg overflow-hidden bg-white origin-top"
-        style={{ 
-          width: '210mm', 
-          minHeight: '297mm',
-        }}
-      >
-        {renderTemplate()}
+    <div className="bg-muted p-2 sm:p-4 rounded-xl overflow-hidden w-full">
+      <div className="overflow-auto max-h-[60vh] sm:max-h-[75vh] lg:max-h-[85vh]">
+        <div 
+          id="cv-preview-content"
+          className="mx-auto shadow-xl rounded-lg overflow-hidden bg-white origin-top-left sm:origin-top"
+          style={{ 
+            width: '210mm', 
+            minHeight: '297mm',
+            transform: 'scale(var(--cv-scale, 0.35))',
+            transformOrigin: 'top left',
+          }}
+        >
+          {renderTemplate()}
+        </div>
       </div>
       <style>{`
-        @media (max-width: 640px) {
-          #cv-preview-content {
-            transform: scale(0.35);
-            margin-bottom: -55%;
+        :root {
+          --cv-scale: 0.32;
+        }
+        @media (min-width: 400px) {
+          :root {
+            --cv-scale: 0.38;
           }
         }
-        @media (min-width: 641px) and (max-width: 1024px) {
+        @media (min-width: 640px) {
+          :root {
+            --cv-scale: 0.45;
+          }
           #cv-preview-content {
-            transform: scale(0.45);
-            margin-bottom: -45%;
+            transform-origin: top center !important;
           }
         }
-        @media (min-width: 1025px) {
-          #cv-preview-content {
-            transform: scale(0.55);
-            margin-bottom: -35%;
+        @media (min-width: 1024px) {
+          :root {
+            --cv-scale: 0.55;
+          }
+        }
+        @media (min-width: 1280px) {
+          :root {
+            --cv-scale: 0.65;
           }
         }
       `}</style>
