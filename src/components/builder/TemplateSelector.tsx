@@ -21,6 +21,22 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
     setModalOpen(true);
   };
 
+  // Sample names based on language
+  const sampleData = {
+    name1: t('sample.name1') || 'John Smith',
+    title1: t('sample.title1') || 'Senior Software Engineer',
+    name2: t('sample.name2') || 'Jane Williams',
+    title2: t('sample.title2') || 'Marketing Director',
+    name3: t('sample.name3') || 'Alex Chen',
+    title3: t('sample.title3') || 'Product Designer',
+    name4: t('sample.name4') || 'Sarah Johnson',
+    title4: t('sample.title4') || 'Creative Director',
+    name5: t('sample.name5') || 'Michael Brown',
+    title5: t('sample.title5') || 'Chief Executive Officer',
+    name6: t('sample.name6') || 'David Lee',
+    title6: t('sample.title6') || 'Full Stack Developer',
+  };
+
   const templates: { id: CVTemplate; name: string; description: string; preview: React.ReactNode }[] = [
     {
       id: 'modern',
@@ -31,8 +47,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
           {/* Header */}
           <div className="flex gap-6 mb-6">
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">John Smith</h1>
-              <p className="text-teal-600 font-medium text-sm mb-3">Senior Software Engineer</p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">{sampleData.name1}</h1>
+              <p className="text-teal-600 font-medium text-sm mb-3">{sampleData.title1}</p>
               <div className="flex flex-wrap gap-3 text-xs text-gray-500">
                 <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> john@email.com</span>
                 <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> +1 234 567</span>
@@ -53,7 +69,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
             <div className="col-span-2">
               <div className="flex items-center gap-2 mb-2">
                 <Briefcase className="w-4 h-4 text-teal-600" />
-                <span className="font-semibold text-sm">Experience</span>
+                <span className="font-semibold text-sm">{t('cv.experience') || 'Experience'}</span>
               </div>
               <div className="ml-6 space-y-2">
                 <div className="h-2 w-full bg-gray-100 rounded" />
@@ -61,7 +77,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
               </div>
             </div>
             <div className="bg-gray-50 rounded-lg p-3">
-              <div className="text-xs font-semibold text-gray-700 mb-2">Skills</div>
+              <div className="text-xs font-semibold text-gray-700 mb-2">{t('cv.skills') || 'Skills'}</div>
               <div className="space-y-1">
                 <div className="h-2 w-full bg-teal-200 rounded" />
                 <div className="h-2 w-4/5 bg-teal-200 rounded" />
@@ -80,8 +96,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
         <div className="font-serif bg-white p-6 h-full text-center">
           {/* Centered Header */}
           <div className="border-b-2 border-gray-800 pb-4 mb-4">
-            <h1 className="text-2xl font-bold text-gray-900 tracking-wide mb-1">JANE WILLIAMS</h1>
-            <p className="text-gray-600 italic text-sm mb-2">Marketing Director</p>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-wide mb-1">{sampleData.name2.toUpperCase()}</h1>
+            <p className="text-gray-600 italic text-sm mb-2">{sampleData.title2}</p>
             <div className="flex justify-center gap-4 text-xs text-gray-500">
               <span>jane@email.com</span>
               <span>•</span>
@@ -93,7 +109,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
           
           {/* Professional Summary */}
           <div className="mb-4 text-left">
-            <h2 className="text-sm font-bold text-gray-800 border-b border-gray-300 pb-1 mb-2">PROFESSIONAL SUMMARY</h2>
+            <h2 className="text-sm font-bold text-gray-800 border-b border-gray-300 pb-1 mb-2">{(t('cv.summary') || 'PROFESSIONAL SUMMARY').toUpperCase()}</h2>
             <div className="space-y-1">
               <div className="h-2 w-full bg-gray-100 rounded" />
               <div className="h-2 w-5/6 bg-gray-100 rounded" />
@@ -102,7 +118,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
           
           {/* Experience */}
           <div className="text-left">
-            <h2 className="text-sm font-bold text-gray-800 border-b border-gray-300 pb-1 mb-2">EXPERIENCE</h2>
+            <h2 className="text-sm font-bold text-gray-800 border-b border-gray-300 pb-1 mb-2">{(t('cv.experience') || 'EXPERIENCE').toUpperCase()}</h2>
             <div className="space-y-1">
               <div className="h-2 w-1/2 bg-gray-200 rounded" />
               <div className="h-2 w-full bg-gray-100 rounded" />
@@ -120,8 +136,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
         <div className="font-sans bg-white p-6 h-full">
           {/* Simple Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-light text-gray-900 mb-1">Alex Chen</h1>
-            <p className="text-gray-400 text-sm tracking-widest uppercase">Product Designer</p>
+            <h1 className="text-3xl font-light text-gray-900 mb-1">{sampleData.name3}</h1>
+            <p className="text-gray-400 text-sm tracking-widest uppercase">{sampleData.title3}</p>
           </div>
           
           {/* Contact - Minimal */}
@@ -133,12 +149,12 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
           {/* Content */}
           <div className="space-y-4">
             <div>
-              <h2 className="text-xs font-medium text-gray-900 uppercase tracking-wider mb-2">About</h2>
+              <h2 className="text-xs font-medium text-gray-900 uppercase tracking-wider mb-2">{t('cv.summary') || 'About'}</h2>
               <div className="h-2 w-full bg-gray-50 rounded mb-1" />
               <div className="h-2 w-3/4 bg-gray-50 rounded" />
             </div>
             <div>
-              <h2 className="text-xs font-medium text-gray-900 uppercase tracking-wider mb-2">Work</h2>
+              <h2 className="text-xs font-medium text-gray-900 uppercase tracking-wider mb-2">{t('cv.experience') || 'Work'}</h2>
               <div className="h-2 w-full bg-gray-50 rounded mb-1" />
               <div className="h-2 w-5/6 bg-gray-50 rounded" />
             </div>
@@ -154,8 +170,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
         <div className="bg-white h-full overflow-hidden">
           {/* Gradient Header */}
           <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 p-6 text-white">
-            <h1 className="text-2xl font-bold mb-1">Sarah Johnson</h1>
-            <p className="text-white/80 text-sm">Creative Director</p>
+            <h1 className="text-2xl font-bold mb-1">{sampleData.name4}</h1>
+            <p className="text-white/80 text-sm">{sampleData.title4}</p>
           </div>
           
           {/* Two Column */}
@@ -170,7 +186,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
                 </div>
               </div>
               <div>
-                <h3 className="text-xs font-bold text-pink-400 mb-2">SKILLS</h3>
+                <h3 className="text-xs font-bold text-pink-400 mb-2">{(t('cv.skills') || 'SKILLS').toUpperCase()}</h3>
                 <div className="space-y-1">
                   <div className="h-1.5 w-full bg-purple-500/50 rounded" />
                   <div className="h-1.5 w-3/4 bg-pink-500/50 rounded" />
@@ -181,7 +197,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
             
             {/* Main */}
             <div className="w-2/3 p-4">
-              <h3 className="text-xs font-bold text-gray-800 mb-2">EXPERIENCE</h3>
+              <h3 className="text-xs font-bold text-gray-800 mb-2">{(t('cv.experience') || 'EXPERIENCE').toUpperCase()}</h3>
               <div className="space-y-1">
                 <div className="h-2 w-full bg-gray-100 rounded" />
                 <div className="h-2 w-4/5 bg-gray-100 rounded" />
@@ -200,9 +216,9 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
         <div className="bg-white h-full overflow-hidden">
           {/* Executive Header */}
           <div className="bg-slate-800 p-6 text-center">
-            <h1 className="text-xl font-bold text-white tracking-wide mb-1">MICHAEL BROWN</h1>
+            <h1 className="text-xl font-bold text-white tracking-wide mb-1">{sampleData.name5.toUpperCase()}</h1>
             <div className="w-12 h-0.5 bg-amber-500 mx-auto my-2" />
-            <p className="text-amber-400 text-sm font-medium">Chief Executive Officer</p>
+            <p className="text-amber-400 text-sm font-medium">{sampleData.title5}</p>
             <div className="flex justify-center gap-4 mt-3 text-xs text-slate-300">
               <span>michael@corp.com</span>
               <span>|</span>
@@ -215,7 +231,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-1 h-4 bg-amber-500" />
-                <h2 className="text-sm font-bold text-slate-800">EXECUTIVE SUMMARY</h2>
+                <h2 className="text-sm font-bold text-slate-800">{(t('cv.summary') || 'EXECUTIVE SUMMARY').toUpperCase()}</h2>
               </div>
               <div className="ml-3 space-y-1">
                 <div className="h-2 w-full bg-slate-100 rounded" />
@@ -226,7 +242,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-1 h-4 bg-amber-500" />
-                <h2 className="text-sm font-bold text-slate-800">LEADERSHIP</h2>
+                <h2 className="text-sm font-bold text-slate-800">{(t('cv.experience') || 'LEADERSHIP').toUpperCase()}</h2>
               </div>
               <div className="ml-3 space-y-1">
                 <div className="h-2 w-full bg-slate-100 rounded" />
@@ -246,8 +262,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
           {/* Tech Header */}
           <div className="flex justify-between items-start border-b-2 border-blue-600 pb-3 mb-4">
             <div>
-              <h1 className="text-lg font-bold text-gray-900">David Lee</h1>
-              <p className="text-blue-600 text-sm">Full Stack Developer</p>
+              <h1 className="text-lg font-bold text-gray-900">{sampleData.name6}</h1>
+              <p className="text-blue-600 text-sm">{sampleData.title6}</p>
             </div>
             <div className="text-right text-xs text-gray-500 space-y-1">
               <div>david@dev.io</div>
@@ -260,7 +276,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
             <div className="col-span-2">
               <div className="flex items-center gap-2 mb-2">
                 <Briefcase className="w-3 h-3 text-blue-600" />
-                <h2 className="text-xs font-bold">EXPERIENCE</h2>
+                <h2 className="text-xs font-bold">{(t('cv.experience') || 'EXPERIENCE').toUpperCase()}</h2>
               </div>
               <div className="bg-gray-50 rounded p-2 space-y-1">
                 <div className="h-1.5 w-1/3 bg-gray-300 rounded" />
@@ -270,7 +286,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ compact = false }) 
             </div>
             
             <div className="bg-slate-900 rounded p-2 text-white">
-              <h3 className="text-xs font-bold text-blue-400 mb-2">TECH STACK</h3>
+              <h3 className="text-xs font-bold text-blue-400 mb-2">{(t('cv.skills') || 'TECH STACK').toUpperCase()}</h3>
               <div className="space-y-1">
                 <div className="h-1.5 w-full bg-blue-500 rounded" />
                 <div className="h-1.5 w-4/5 bg-blue-400 rounded" />

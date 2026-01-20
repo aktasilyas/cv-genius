@@ -7,14 +7,27 @@ import { useFormValidation, ValidationRules } from '@/hooks/useFormValidation';
 
 const PersonalInfoStep = () => {
   const { cvData, updatePersonalInfo } = useCVContext();
-  const { t } = useSettings();
+  const { t, language } = useSettings();
   const { validateField, markTouched, isTouched } = useFormValidation();
   const { personalInfo } = cvData;
+
+  // Localized placeholders
+  const getPlaceholder = (key: string): string => {
+    const placeholders: Record<string, Record<string, string>> = {
+      fullName: { en: 'John Doe', tr: 'Ahmet Yılmaz', de: 'Max Müller', fr: 'Jean Dupont', es: 'Juan García' },
+      title: { en: 'Senior Software Engineer', tr: 'Kıdemli Yazılım Mühendisi', de: 'Senior Software-Ingenieur', fr: 'Ingénieur Logiciel Senior', es: 'Ingeniero de Software Senior' },
+      email: { en: 'john@example.com', tr: 'ahmet@ornek.com', de: 'max@beispiel.de', fr: 'jean@exemple.fr', es: 'juan@ejemplo.com' },
+      phone: { en: '+1 234 567 890', tr: '+90 5XX XXX XX XX', de: '+49 123 456 789', fr: '+33 1 23 45 67 89', es: '+34 612 345 678' },
+      location: { en: 'New York, NY', tr: 'İstanbul, Türkiye', de: 'Berlin, Deutschland', fr: 'Paris, France', es: 'Madrid, España' },
+      linkedin: { en: 'linkedin.com/in/johndoe', tr: 'linkedin.com/in/ahmetyilmaz', de: 'linkedin.com/in/maxmuller', fr: 'linkedin.com/in/jeandupont', es: 'linkedin.com/in/juangarcia' },
+      website: { en: 'johndoe.com', tr: 'ahmetyilmaz.com', de: 'maxmuller.de', fr: 'jeandupont.fr', es: 'juangarcia.es' },
+    };
+    return placeholders[key]?.[language] || placeholders[key]?.en || '';
+  };
 
   const fields: Array<{
     key: keyof typeof personalInfo;
     labelKey: string;
-    placeholder: string;
     required?: boolean;
     type?: string;
     rules: ValidationRules;
@@ -22,21 +35,18 @@ const PersonalInfoStep = () => {
     { 
       key: 'fullName', 
       labelKey: 'field.fullName', 
-      placeholder: 'John Doe', 
       required: true,
       rules: { required: true, minLength: 2 }
     },
     { 
       key: 'title', 
       labelKey: 'field.title', 
-      placeholder: 'Senior Software Engineer', 
       required: true,
       rules: { required: true, minLength: 2 }
     },
     { 
       key: 'email', 
       labelKey: 'field.email', 
-      placeholder: 'john@example.com', 
       type: 'email', 
       required: true,
       rules: { required: true, email: true }
@@ -44,7 +54,6 @@ const PersonalInfoStep = () => {
     { 
       key: 'phone', 
       labelKey: 'field.phone', 
-      placeholder: '+1 234 567 890', 
       type: 'tel', 
       required: true,
       rules: { required: true, phone: true }
@@ -52,20 +61,17 @@ const PersonalInfoStep = () => {
     { 
       key: 'location', 
       labelKey: 'field.location', 
-      placeholder: 'New York, NY', 
       required: true,
       rules: { required: true }
     },
     { 
       key: 'linkedin', 
       labelKey: 'field.linkedin', 
-      placeholder: 'linkedin.com/in/johndoe',
       rules: {}
     },
     { 
       key: 'website', 
       labelKey: 'field.website', 
-      placeholder: 'johndoe.com',
       rules: {}
     },
   ];
@@ -105,7 +111,7 @@ const PersonalInfoStep = () => {
               <Input
                 id={field.key}
                 type={field.type || 'text'}
-                placeholder={field.placeholder}
+                placeholder={getPlaceholder(field.key)}
                 value={value}
                 onChange={(e) => updatePersonalInfo(field.key, e.target.value)}
                 onBlur={() => handleBlur(field.key)}
