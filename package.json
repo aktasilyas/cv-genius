@@ -10,7 +10,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:watch": "vitest --coverage",
+    "test:domain": "vitest run src/__tests__/domain",
+    "test:application": "vitest run src/__tests__/application",
+    "test:presentation": "vitest run src/__tests__/presentation"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
