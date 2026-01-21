@@ -1,6 +1,19 @@
 import { z } from 'zod';
 
+// Base schema (allows empty values during editing)
 export const ExperienceSchema = z.object({
+  id: z.string(),
+  company: z.string(),
+  position: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+  current: z.boolean(),
+  description: z.string(),
+  achievements: z.array(z.string()),
+});
+
+// Validation schema (enforces required fields)
+export const ExperienceValidationSchema = z.object({
   id: z.string(),
   company: z.string().min(1, 'Company name is required'),
   position: z.string().min(1, 'Position is required'),

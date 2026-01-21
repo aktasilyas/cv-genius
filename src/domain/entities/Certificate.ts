@@ -1,6 +1,16 @@
 import { z } from 'zod';
 
+// Base schema (allows empty values during editing)
 export const CertificateSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  issuer: z.string(),
+  date: z.string(),
+  url: z.string().optional().or(z.literal('')),
+});
+
+// Validation schema (enforces required fields)
+export const CertificateValidationSchema = z.object({
   id: z.string(),
   name: z.string().min(1, 'Certificate name is required'),
   issuer: z.string().min(1, 'Issuer is required'),

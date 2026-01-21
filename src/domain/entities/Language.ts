@@ -1,7 +1,15 @@
 import { z } from 'zod';
 import { LanguageProficiencySchema } from '../value-objects/LanguageProficiency';
 
+// Base schema (allows empty values during editing)
 export const LanguageSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  proficiency: LanguageProficiencySchema,
+});
+
+// Validation schema (enforces required fields)
+export const LanguageValidationSchema = z.object({
   id: z.string(),
   name: z.string().min(1, 'Language name is required'),
   proficiency: LanguageProficiencySchema,

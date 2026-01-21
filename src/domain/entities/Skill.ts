@@ -1,7 +1,15 @@
 import { z } from 'zod';
 import { SkillLevelSchema } from '../value-objects/SkillLevel';
 
+// Base schema (allows empty values during editing)
 export const SkillSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  level: SkillLevelSchema,
+});
+
+// Validation schema (enforces required fields)
+export const SkillValidationSchema = z.object({
   id: z.string(),
   name: z.string().min(1, 'Skill name is required'),
   level: SkillLevelSchema,

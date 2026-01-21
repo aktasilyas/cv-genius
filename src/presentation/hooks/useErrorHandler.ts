@@ -25,7 +25,15 @@ interface ErrorHandlerOptions {
  * Handles different error types with appropriate UI feedback and logging
  */
 export const useErrorHandler = () => {
-  const navigate = useNavigate();
+  // Use navigate safely - it might not be available outside Router context
+  let navigate: ReturnType<typeof useNavigate> | null = null;
+  try {
+    navigate = useNavigate();
+  } catch (error) {
+    // Router context not available, navigation will be disabled
+    console.warn('useErrorHandler: Router context not available, navigation disabled');
+  }
+
   // TODO: Get language from settings context when available
   const language = 'en'; // Default language
 
@@ -50,7 +58,7 @@ export const useErrorHandler = () => {
       if (showToast) {
         toast.error(getErrorMessage('AUTH_ERROR', language));
       }
-      if (redirectOnAuth) {
+      if (redirectOnAuth && navigate) {
         navigate('/login');
       }
       return;
