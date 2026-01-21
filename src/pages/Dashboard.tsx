@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { Plus, FileText, Trash2, Copy, Edit, MoreVertical, Star, Loader2, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/context/SettingsContext';
@@ -38,12 +38,6 @@ const Dashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      navigate('/');
-    }
-  }, [authLoading, isAuthenticated, navigate]);
-
-  useEffect(() => {
     if (isAuthenticated) {
       loadCVs();
     }
@@ -66,6 +60,7 @@ const Dashboard = () => {
     // Clear localStorage and navigate to builder
     localStorage.removeItem('cv-data');
     localStorage.removeItem('editing-cv-id');
+    localStorage.removeItem('cv-title');
     navigate('/builder');
   };
 
@@ -73,6 +68,7 @@ const Dashboard = () => {
     localStorage.setItem('cv-data', JSON.stringify(cv.cv_data));
     localStorage.setItem('editing-cv-id', cv.id);
     localStorage.setItem('selected-template', cv.selected_template);
+    localStorage.setItem('cv-title', cv.title);
     navigate('/builder');
   };
 
@@ -126,6 +122,10 @@ const Dashboard = () => {
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -193,7 +193,7 @@ const Dashboard = () => {
             </Button>
           </motion.div>
         ) : (
-          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {cvs.map((cv, index) => (
               <motion.div
                 key={cv.id}
@@ -201,37 +201,105 @@ const Dashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Card className="group hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-base sm:text-lg flex items-center gap-2 truncate pr-2">
-                        {cv.title}
-                        {cv.is_default && (
-                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
+                <Card
+                  className="group hover:shadow-lg transition-all hover:border-accent/50 cursor-pointer"
+                  onClick={() => handleEdit(cv)}
+                >
+                  <CardContent className="p-3">
+                    {/* Mini CV Preview */}
+                    <div className="aspect-[210/297] bg-white dark:bg-zinc-900 rounded border border-border overflow-hidden mb-2 relative">
+                      <div className="p-2 scale-[0.35] origin-top-left w-[286%] h-[286%] text-[10px] leading-tight">
+                        {/* Header */}
+                        <div className="text-center mb-2 border-b pb-1">
+                          <div className="font-bold text-[14px] text-foreground truncate">
+                            {cv.cv_data.personalInfo?.fullName || 'Name'}
+                          </div>
+                          {cv.cv_data.personalInfo?.title && (
+                            <div className="text-muted-foreground text-[10px]">{cv.cv_data.personalInfo.title}</div>
+                          )}
+                          <div className="text-muted-foreground text-[8px] flex items-center justify-center gap-1 flex-wrap">
+                            {cv.cv_data.personalInfo?.email && <span>{cv.cv_data.personalInfo.email}</span>}
+                            {cv.cv_data.personalInfo?.phone && <span>• {cv.cv_data.personalInfo.phone}</span>}
+                          </div>
+                        </div>
+
+                        {/* Summary */}
+                        {cv.cv_data.summary && (
+                          <div className="mb-2">
+                            <div className="font-semibold text-[9px] text-accent mb-0.5">Summary</div>
+                            <div className="text-[8px] text-muted-foreground line-clamp-2">{cv.cv_data.summary}</div>
+                          </div>
                         )}
-                      </CardTitle>
+
+                        {/* Experience */}
+                        {cv.cv_data.experience && cv.cv_data.experience.length > 0 && (
+                          <div className="mb-2">
+                            <div className="font-semibold text-[9px] text-accent mb-0.5">Experience</div>
+                            {cv.cv_data.experience.slice(0, 2).map((exp, i) => (
+                              <div key={i} className="text-[8px] mb-0.5">
+                                <span className="font-medium text-foreground">{exp.position}</span>
+                                {exp.company && <span className="text-muted-foreground"> at {exp.company}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Skills */}
+                        {cv.cv_data.skills && cv.cv_data.skills.length > 0 && (
+                          <div>
+                            <div className="font-semibold text-[9px] text-accent mb-0.5">Skills</div>
+                            <div className="flex flex-wrap gap-0.5">
+                              {cv.cv_data.skills.slice(0, 6).map((skill, i) => (
+                                <span key={i} className="text-[7px] bg-secondary px-1 rounded text-foreground">
+                                  {skill.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Template badge */}
+                      <div className="absolute bottom-1 right-1 text-[8px] bg-accent/10 text-accent px-1 rounded capitalize">
+                        {cv.selected_template}
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-medium truncate">{cv.title || t('dashboard.unnamed') || 'Unnamed'}</span>
+                          {cv.is_default && (
+                            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 flex-shrink-0" />
+                          )}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {formatDate(cv.updated_at)}
+                        </div>
+                      </div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
-                            <MoreVertical className="w-4 h-4" />
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
+                            <MoreVertical className="w-3.5 h-3.5" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover border shadow-lg z-50">
-                          <DropdownMenuItem onClick={() => handleEdit(cv)}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(cv); }}>
                             <Edit className="w-4 h-4 mr-2" />
                             {t('dashboard.edit') || 'Edit'}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDuplicate(cv.id)}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDuplicate(cv.id); }}>
                             <Copy className="w-4 h-4 mr-2" />
                             {t('dashboard.duplicate') || 'Duplicate'}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleSetDefault(cv.id)}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleSetDefault(cv.id); }}>
                             <Star className="w-4 h-4 mr-2" />
                             {t('dashboard.setDefault') || 'Set as Default'}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => setDeleteId(cv.id)}
+                            onClick={(e) => { e.stopPropagation(); setDeleteId(cv.id); }}
                             className="text-destructive focus:text-destructive"
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
@@ -240,26 +308,7 @@ const Dashboard = () => {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pb-2 px-3 sm:px-6">
-                    <div className="aspect-[210/297] bg-secondary rounded-lg overflow-hidden mb-3 relative">
-                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                        <FileText className="w-10 h-10 sm:w-12 sm:h-12" />
-                      </div>
-                    </div>
-                    <div className="text-xs sm:text-sm text-muted-foreground">
-                      <p className="truncate">{cv.cv_data.personalInfo?.fullName || t('dashboard.unnamed') || 'Unnamed'}</p>
-                      <p className="capitalize">{cv.selected_template} {t('dashboard.template') || 'template'}</p>
-                    </div>
                   </CardContent>
-                  <CardFooter className="pt-2 px-3 sm:px-6 pb-3 sm:pb-6 flex items-center justify-between">
-                    <span className="text-[10px] sm:text-xs text-muted-foreground">
-                      {t('dashboard.updated') || 'Updated'}: {formatDate(cv.updated_at)}
-                    </span>
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(cv)} className="text-xs sm:text-sm h-8">
-                      {t('dashboard.open') || 'Open'}
-                    </Button>
-                  </CardFooter>
                 </Card>
               </motion.div>
             ))}

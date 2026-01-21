@@ -3,16 +3,28 @@ import { motion } from 'framer-motion';
 import { Briefcase, Loader2, Target, CheckCircle2, XCircle, Lightbulb, Sparkles } from 'lucide-react';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { matchJob } from '@/services/aiService';
+import { AuthRequiredModal } from '@/presentation/components/auth/AuthGuard';
 import { toast } from 'sonner';
 
 const JobMatchPanel = () => {
   const { cvData, jobMatch, setJobMatch } = useCVContext();
   const { t, language } = useSettings();
+  const { isAuthenticated } = useAuth();
   const [jobDescription, setJobDescription] = useState('');
   const [isMatching, setIsMatching] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleMatchClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    handleMatchJob();
+  };
 
   const handleMatchJob = async () => {
     if (!jobDescription.trim()) {
@@ -27,7 +39,13 @@ const JobMatchPanel = () => {
       toast.success(t('job.matchSuccess') || 'Job matching complete!');
     } catch (error) {
       console.error('Job match error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to match job');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to match job';
+      toast.error(errorMessage);
+
+      // Auth hatası ise modal aç
+      if (errorMessage.includes('sign in') || errorMessage.includes('Authentication')) {
+        setShowAuthModal(true);
+      }
     } finally {
       setIsMatching(false);
     }
@@ -62,7 +80,7 @@ const JobMatchPanel = () => {
         />
 
         <Button
-          onClick={handleMatchJob}
+          onClick={handleMatchClick}
           disabled={isMatching || !jobDescription.trim()}
           className="w-full gap-2"
           variant="accent"
@@ -179,6 +197,12 @@ const JobMatchPanel = () => {
           )}
         </motion.div>
       )}
+
+      <AuthRequiredModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+        feature="Job Matching"
+      />
     </div>
   );
 };

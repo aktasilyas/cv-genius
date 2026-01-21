@@ -8,7 +8,16 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { cvService } from '@/services/cvService';
 import { isWaitlistMode, isFeatureRestricted } from '@/types/waitlist';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import PersonalInfoStep from '@/components/wizard/PersonalInfoStep';
 import ExperienceStep from '@/components/wizard/ExperienceStep';
 import EducationStep from '@/components/wizard/EducationStep';
@@ -34,6 +43,7 @@ import CreativeTemplate from '@/components/templates/CreativeTemplate';
 import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
 import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
 import AuthButton from '@/components/auth/AuthButton';
+import { AuthRequiredModal } from '@/presentation/components/auth/AuthGuard';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import html2pdf from 'html2pdf.js';
@@ -59,11 +69,18 @@ const BuilderContent = () => {
   const [rightPanel, setRightPanel] = useState<'preview' | 'ai' | 'job' | 'sections' | 'history'>('preview');
   const [editingCVId, setEditingCVId] = useState<string | null>(null);
   const [showWaitlist, setShowWaitlist] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [cvTitle, setCvTitle] = useState('');
 
   useEffect(() => {
     const savedId = localStorage.getItem('editing-cv-id');
+    const savedTitle = localStorage.getItem('cv-title');
     if (savedId) {
       setEditingCVId(savedId);
+    }
+    if (savedTitle) {
+      setCvTitle(savedTitle);
     }
   }, []);
 
@@ -82,13 +99,21 @@ const BuilderContent = () => {
     }
   };
 
+  const handleExportClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    exportToPDF();
+  };
+
   const exportToPDF = async () => {
     // In waitlist mode, show waitlist modal for watermark-free export
     if (isFeatureRestricted('pdfExport')) {
       setShowWaitlist(true);
       return;
     }
-    
+
     setIsExporting(true);
       
     try {
@@ -131,17 +156,32 @@ const BuilderContent = () => {
     }
   };
 
-  const handleSaveCV = async () => {
+  const handleSaveClick = () => {
     if (!isAuthenticated) {
       toast.error(t('builder.loginToSave') || 'Please sign in to save your CV');
       return;
     }
 
+    // İlk kayıtta dialog aç, sonrakilerde direkt kaydet
+    if (!editingCVId) {
+      // Yeni CV - varsayılan isim öner
+      const defaultTitle = cvData.personalInfo.fullName
+        ? `${cvData.personalInfo.fullName}'s CV`
+        : '';
+      setCvTitle(defaultTitle);
+      setShowSaveDialog(true);
+    } else {
+      // Mevcut CV - direkt güncelle
+      handleSaveCV(cvTitle);
+    }
+  };
+
+  const handleSaveCV = async (titleToSave?: string) => {
+    setShowSaveDialog(false);
     setIsSaving(true);
     try {
-      const title = cvData.personalInfo.fullName 
-        ? `${cvData.personalInfo.fullName}'s CV`
-        : t('dashboard.untitled') || 'Untitled CV';
+      // Dialog'dan gelen cvTitle state'ini veya parametre olarak gelen değeri kullan
+      const title = (titleToSave !== undefined ? titleToSave : cvTitle).trim() || t('dashboard.untitled') || 'Untitled CV';
 
       if (editingCVId) {
         await cvService.updateCV(editingCVId, {
@@ -149,11 +189,15 @@ const BuilderContent = () => {
           selected_template: selectedTemplate,
           title,
         });
+        localStorage.setItem('cv-title', title);
+        setCvTitle(title);
         toast.success(t('builder.updateSuccess') || 'CV updated successfully');
       } else {
         const newCV = await cvService.createCV(title, cvData, selectedTemplate);
         setEditingCVId(newCV.id);
         localStorage.setItem('editing-cv-id', newCV.id);
+        localStorage.setItem('cv-title', title);
+        setCvTitle(title);
         toast.success(t('builder.saveSuccess') || 'CV saved successfully');
       }
     } catch (error) {
@@ -232,7 +276,7 @@ const BuilderContent = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleSaveCV}
+                onClick={handleSaveClick}
                 disabled={isSaving}
                 className="gap-1 sm:gap-2 px-2 sm:px-3"
               >
@@ -241,7 +285,7 @@ const BuilderContent = () => {
               </Button>
             )}
 
-            <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting} className="gap-1 sm:gap-2 px-2 sm:px-3">
+            <Button variant="accent" size="sm" onClick={handleExportClick} disabled={isExporting} className="gap-1 sm:gap-2 px-2 sm:px-3">
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               <span className="hidden sm:inline">{t('btn.export')}</span>
             </Button>
@@ -250,12 +294,51 @@ const BuilderContent = () => {
       </header>
       
       <SettingsSidebar isOpen={showSettings} onClose={() => setShowSettings(false)} />
-      <WaitlistModal 
-        isOpen={showWaitlist} 
-        onClose={() => setShowWaitlist(false)} 
+      <WaitlistModal
+        isOpen={showWaitlist}
+        onClose={() => setShowWaitlist(false)}
         feature={t('premium.noWatermark') || 'Watermark-Free PDF Export'}
         source="pdf-export"
       />
+      <AuthRequiredModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+        feature="PDF Export"
+      />
+
+      {/* Save CV Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('builder.saveCVTitle') || 'Save Your CV'}</DialogTitle>
+            <DialogDescription>
+              {t('builder.saveCVDesc') || 'Give your CV a name so you can easily find it later.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={cvTitle}
+              onChange={(e) => setCvTitle(e.target.value)}
+              placeholder={t('builder.cvNamePlaceholder') || 'My Software Engineer CV'}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && cvTitle.trim()) {
+                  handleSaveCV(cvTitle);
+                }
+              }}
+              autoFocus
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+              {t('btn.cancel') || 'Cancel'}
+            </Button>
+            <Button variant="accent" onClick={() => handleSaveCV(cvTitle)} disabled={!cvTitle.trim()}>
+              <Save className="w-4 h-4 mr-2" />
+              {t('builder.saveCV') || 'Save CV'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Mobile Creation Mode Toggle */}
       <div className="lg:hidden container mx-auto px-2 pt-3">
@@ -393,7 +476,7 @@ const BuilderContent = () => {
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     ) : (
-                      <Button variant="accent" size="sm" onClick={exportToPDF} disabled={isExporting} className="gap-1 sm:gap-2">
+                      <Button variant="accent" size="sm" onClick={handleExportClick} disabled={isExporting} className="gap-1 sm:gap-2">
                         {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                         <span className="hidden xs:inline">{t('btn.export') || 'Export CV'}</span>
                       </Button>

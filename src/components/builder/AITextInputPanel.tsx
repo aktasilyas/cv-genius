@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import { Sparkles, FileText, Loader2, ArrowRight, Wand2 } from 'lucide-react';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { parseCVText } from '@/services/aiService';
 import { defaultSectionOrder, defaultSectionVisibility } from '@/types/cv';
+import { AuthRequiredModal } from '@/presentation/components/auth/AuthGuard';
 import { toast } from 'sonner';
 
 const AITextInputPanel = () => {
@@ -20,7 +22,9 @@ const AITextInputPanel = () => {
     saveVersion
   } = useCVContext();
   const { t, language } = useSettings();
+  const { isAuthenticated } = useAuth();
   const [showExample, setShowExample] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const exampleText = language === 'tr' ? `Ahmet Yılmaz
 E-posta: ahmet.yilmaz@email.com
@@ -97,6 +101,14 @@ English (Native), Spanish (Professional)
 Certificates:
 AWS Solutions Architect - Amazon - 2023`;
 
+  const handleParseClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    handleParseText();
+  };
+
   const handleParseText = async () => {
     if (!aiTextInput.trim()) {
       toast.error(t('ai.noText') || 'Please enter some text to parse');
@@ -127,7 +139,13 @@ AWS Solutions Architect - Amazon - 2023`;
       setCreationMode('structured');
     } catch (error) {
       console.error('Parse error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to parse CV text');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to parse CV text';
+      toast.error(errorMessage);
+
+      // Auth hatası ise modal aç
+      if (errorMessage.includes('sign in') || errorMessage.includes('Authentication')) {
+        setShowAuthModal(true);
+      }
     } finally {
       setIsParsingText(false);
     }
@@ -166,7 +184,7 @@ AWS Solutions Architect - Amazon - 2023`;
       <div className="flex flex-wrap gap-3">
         <Button
           variant="accent"
-          onClick={handleParseText}
+          onClick={handleParseClick}
           disabled={isParsingText || !aiTextInput.trim()}
           className="gap-2"
         >
@@ -218,6 +236,12 @@ AWS Solutions Architect - Amazon - 2023`;
           <li>• {t('ai.tip4') || 'Include contact information at the beginning'}</li>
         </ul>
       </div>
+
+      <AuthRequiredModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+        feature="AI CV Parser"
+      />
     </motion.div>
   );
 };

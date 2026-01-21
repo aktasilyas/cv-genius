@@ -12,13 +12,13 @@ serve(async (req) => {
   }
 
   try {
-    // Auth kontrolü - ZORUNLU
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Auth kontrolü
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({
         error: 'Authentication required',
         message: 'Please sign in to use AI features'
@@ -28,9 +28,8 @@ serve(async (req) => {
       });
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
       return new Response(JSON.stringify({
@@ -42,8 +41,8 @@ serve(async (req) => {
       });
     }
 
-    // Kullanıcının plan'ını kontrol et
-    const { data: subscription } = await supabase
+    // Limit kontrolü
+    const { data: subscription } = await supabaseAdmin
       .from('user_subscriptions')
       .select('plan')
       .eq('user_id', user.id)
@@ -52,9 +51,8 @@ serve(async (req) => {
     const isPremium = subscription?.plan === 'premium';
     const dailyLimit = isPremium ? PREMIUM_LIMIT : FREE_LIMIT;
 
-    // Günlük kullanımı kontrol et
     const today = new Date().toISOString().split('T')[0];
-    const { count } = await supabase
+    const { count } = await supabaseAdmin
       .from('ai_usage')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -64,63 +62,81 @@ serve(async (req) => {
     if ((count || 0) >= dailyLimit) {
       return new Response(JSON.stringify({
         error: 'Daily limit reached',
-        message: isPremium
-          ? `You have used all ${dailyLimit} daily parses.`
-          : `Free plan allows ${dailyLimit} parses per day. Upgrade to Premium for more.`,
-        limit: dailyLimit,
-        used: count,
-        isPremium
+        message: `Daily limit of ${dailyLimit} parses reached.`
       }), {
         status: 429,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Request body'yi al
+    // OpenAI çağrısı
     const { text, language = 'en', pdfBase64 } = await req.json();
     const openAIKey = Deno.env.get('OPENAI_API_KEY');
 
-    if (!openAIKey) {
-      throw new Error('OPENAI_API_KEY not configured');
+    // PDF desteği - GPT-4o vision ile
+    let contentToProcess = text;
+
+    if (pdfBase64 && !text) {
+      // PDF base64 varsa, GPT-4o vision modelini kullan
+      const visionResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Extract all text content from this PDF document. Return only the text, no explanations.'
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:application/pdf;base64,${pdfBase64}`
+                  }
+                }
+              ]
+            }
+          ],
+          max_tokens: 4000
+        }),
+      });
+
+      if (!visionResponse.ok) {
+        // Vision API başarısız olursa, kullanıcıya metin yapıştırmasını öner
+        return new Response(JSON.stringify({
+          error: 'PDF parsing failed',
+          message: 'Could not extract text from PDF. Please copy and paste the text from your LinkedIn PDF instead.'
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const visionData = await visionResponse.json();
+      contentToProcess = visionData.choices[0].message.content;
+    }
+
+    if (!contentToProcess || contentToProcess.trim() === '') {
+      return new Response(JSON.stringify({
+        error: 'No content',
+        message: 'Please provide CV text or upload a PDF file.'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const systemPrompt = language === 'tr'
-      ? `CV metnini analiz et ve yapılandırılmış JSON formatına dönüştür.
-
-ÖNEMLİ TARİH KURALLARI:
-- Tüm tarihler MUTLAKA "YYYY-MM" formatında olmalı (örn: "2021-01", "2019-09")
-- Sadece yıl varsa (örn: "2021") Ocak ayını varsay: "2021-01"
-- "Present", "Current", "Günümüz", "Halen" gibi ifadeler için boş string "" kullan ve current: true yap
-- Ay isimleri varsa sayıya çevir (January=01, Ocak=01, vb.)
-
-JSON formatı:
-{
-  "personalInfo": { "fullName": "", "email": "", "phone": "", "location": "", "linkedin": "", "website": "", "title": "" },
-  "summary": "",
-  "experience": [{ "id": "exp-1", "company": "", "position": "", "startDate": "YYYY-MM", "endDate": "YYYY-MM veya boş", "current": true/false, "description": "", "achievements": [] }],
-  "education": [{ "id": "edu-1", "institution": "", "degree": "", "field": "", "startDate": "YYYY-MM", "endDate": "YYYY-MM", "gpa": "", "achievements": [] }],
-  "skills": [{ "id": "skill-1", "name": "", "level": "beginner|intermediate|advanced|expert" }],
-  "languages": [{ "id": "lang-1", "name": "", "proficiency": "basic|conversational|professional|native" }],
-  "certificates": [{ "id": "cert-1", "name": "", "issuer": "", "date": "YYYY-MM", "url": "" }]
-}`
-      : `Parse the CV text and convert to structured JSON format.
-
-CRITICAL DATE RULES:
-- ALL dates MUST be in "YYYY-MM" format (e.g., "2021-01", "2019-09")
-- If only year is given (e.g., "2021"), assume January: "2021-01"
-- For "Present", "Current", "Now" - use empty string "" and set current: true
-- Convert month names to numbers (January=01, February=02, etc.)
-
-JSON format:
-{
-  "personalInfo": { "fullName": "", "email": "", "phone": "", "location": "", "linkedin": "", "website": "", "title": "" },
-  "summary": "",
-  "experience": [{ "id": "exp-1", "company": "", "position": "", "startDate": "YYYY-MM", "endDate": "YYYY-MM or empty", "current": true/false, "description": "", "achievements": [] }],
-  "education": [{ "id": "edu-1", "institution": "", "degree": "", "field": "", "startDate": "YYYY-MM", "endDate": "YYYY-MM", "gpa": "", "achievements": [] }],
-  "skills": [{ "id": "skill-1", "name": "", "level": "beginner|intermediate|advanced|expert" }],
-  "languages": [{ "id": "lang-1", "name": "", "proficiency": "basic|conversational|professional|native" }],
-  "certificates": [{ "id": "cert-1", "name": "", "issuer": "", "date": "YYYY-MM", "url": "" }]
-}`;
+      ? `CV'yi JSON'a dönüştür. Tarihler YYYY-MM formatında. "Günümüz/Halen" için endDate:"", current:true kullan.
+{"personalInfo":{"fullName":"","email":"","phone":"","location":"","linkedin":"","website":"","title":""},"summary":"","experience":[{"id":"exp-1","company":"","position":"","startDate":"","endDate":"","current":false,"description":"","achievements":[]}],"education":[{"id":"edu-1","institution":"","degree":"","field":"","startDate":"","endDate":"","gpa":"","achievements":[]}],"skills":[{"id":"skill-1","name":"","level":"intermediate"}],"languages":[{"id":"lang-1","name":"","proficiency":"professional"}],"certificates":[{"id":"cert-1","name":"","issuer":"","date":"","url":""}]}`
+      : `Parse CV to JSON. Dates in YYYY-MM format. For "Present" use endDate:"", current:true.
+{"personalInfo":{"fullName":"","email":"","phone":"","location":"","linkedin":"","website":"","title":""},"summary":"","experience":[{"id":"exp-1","company":"","position":"","startDate":"","endDate":"","current":false,"description":"","achievements":[]}],"education":[{"id":"edu-1","institution":"","degree":"","field":"","startDate":"","endDate":"","gpa":"","achievements":[]}],"skills":[{"id":"skill-1","name":"","level":"intermediate"}],"languages":[{"id":"lang-1","name":"","proficiency":"professional"}],"certificates":[{"id":"cert-1","name":"","issuer":"","date":"","url":""}]}`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -132,38 +148,30 @@ JSON format:
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: text || 'Empty CV' }
+          { role: 'user', content: contentToProcess }
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.2
+        temperature: 0.2,
+        max_tokens: 2000
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'OpenAI API error');
+      const err = await response.json();
+      throw new Error(err.error?.message || 'OpenAI error');
     }
 
     const data = await response.json();
     const result = JSON.parse(data.choices[0].message.content);
 
-    // Kullanımı kaydet
-    const tokensUsed = data.usage?.total_tokens || 0;
-    await supabase.from('ai_usage').insert({
+    // Kullanım kaydı
+    await supabaseAdmin.from('ai_usage').insert({
       user_id: user.id,
       function_name: 'parse-cv-text',
-      tokens_used: tokensUsed
+      tokens_used: data.usage?.total_tokens || 0
     });
 
-    // Kalan kullanım bilgisini response'a ekle
-    return new Response(JSON.stringify({
-      ...result,
-      _usage: {
-        remaining: dailyLimit - (count || 0) - 1,
-        limit: dailyLimit,
-        isPremium
-      }
-    }), {
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

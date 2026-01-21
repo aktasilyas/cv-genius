@@ -3,16 +3,28 @@ import { motion } from 'framer-motion';
 import { Sparkles, AlertTriangle, Lightbulb, CheckCircle2, Loader2, RefreshCw, Wand2, Info } from 'lucide-react';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { AIFeedback } from '@/types/cv';
 import { analyzeCV } from '@/services/aiService';
 import CVScoreCard from './CVScoreCard';
+import { AuthRequiredModal } from '@/presentation/components/auth/AuthGuard';
 import { toast } from 'sonner';
 
 const AIAnalysisPanel = () => {
   const { cvData, aiFeedback, setAIFeedback, isAnalyzing, setIsAnalyzing, cvScore, setCVScore } = useCVContext();
   const { t, language } = useSettings();
+  const { isAuthenticated } = useAuth();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleAnalyzeClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    analyzeWithAI();
+  };
 
   const analyzeWithAI = async () => {
     setIsAnalyzing(true);
@@ -23,7 +35,13 @@ const AIAnalysisPanel = () => {
       toast.success(t('ai.analysisComplete') || 'Analysis complete!');
     } catch (error) {
       console.error('Analysis error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to analyze CV');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to analyze CV';
+      toast.error(errorMessage);
+
+      // Auth hatası ise modal aç
+      if (errorMessage.includes('sign in') || errorMessage.includes('Authentication')) {
+        setShowAuthModal(true);
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -58,10 +76,10 @@ const AIAnalysisPanel = () => {
           <Sparkles className="w-5 h-5 text-accent" />
           <h3 className="font-semibold">{t('ai.title') || 'AI Analysis'}</h3>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={analyzeWithAI}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleAnalyzeClick}
           disabled={isAnalyzing}
         >
           {isAnalyzing ? (
@@ -84,7 +102,7 @@ const AIAnalysisPanel = () => {
           <p className="text-muted-foreground text-sm mb-4">
             {t('ai.empty') || 'Click "Analyze" to get AI-powered suggestions'}
           </p>
-          <Button variant="accent" onClick={analyzeWithAI}>
+          <Button variant="accent" onClick={handleAnalyzeClick}>
             {t('ai.startAnalysis') || 'Start Analysis'}
           </Button>
         </div>
@@ -130,6 +148,12 @@ const AIAnalysisPanel = () => {
           ))}
         </div>
       )}
+
+      <AuthRequiredModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+        feature="AI CV Analysis"
+      />
     </div>
   );
 };
