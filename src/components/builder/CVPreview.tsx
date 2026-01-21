@@ -1,17 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, memo, Suspense } from 'react';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
-import ModernTemplate from '@/components/templates/ModernTemplate';
-import ClassicTemplate from '@/components/templates/ClassicTemplate';
-import MinimalTemplate from '@/components/templates/MinimalTemplate';
-import CreativeTemplate from '@/components/templates/CreativeTemplate';
-import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
-import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
+import { getTemplateComponent, TemplateFallback } from '@/presentation/components/templates';
 
 const A4_PX = { width: 794, height: 1123 };
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-const CVPreview = () => {
+const CVPreview = memo(() => {
   const { cvData, selectedTemplate, templateCustomization } = useCVContext();
   const { language, t } = useSettings();
 
@@ -65,26 +60,26 @@ const CVPreview = () => {
     [scale]
   );
 
-  const renderTemplate = () => {
-    const templateProps = { data: cvData, language, t, customization: templateCustomization };
+  // Memoize template component to avoid re-creating on every render
+  const TemplateComponent = useMemo(
+    () => getTemplateComponent(selectedTemplate as any),
+    [selectedTemplate]
+  );
 
-    switch (selectedTemplate) {
-      case 'modern':
-        return <ModernTemplate {...templateProps} />;
-      case 'classic':
-        return <ClassicTemplate {...templateProps} />;
-      case 'minimal':
-        return <MinimalTemplate {...templateProps} />;
-      case 'creative':
-        return <CreativeTemplate {...templateProps} />;
-      case 'executive':
-        return <ExecutiveTemplate {...templateProps} />;
-      case 'technical':
-        return <TechnicalTemplate {...templateProps} />;
-      default:
-        return <ModernTemplate {...templateProps} />;
-    }
-  };
+  // Memoize CV data to prevent unnecessary re-renders
+  // Only update when data actually changes
+  const memoizedData = useMemo(() => cvData, [JSON.stringify(cvData)]);
+
+  // Memoize template props
+  const templateProps = useMemo(
+    () => ({
+      data: memoizedData,
+      language,
+      t,
+      customization: templateCustomization
+    }),
+    [memoizedData, language, t, templateCustomization]
+  );
 
   return (
     <div className="bg-muted p-2 sm:p-4 rounded-xl overflow-hidden w-full">
@@ -108,12 +103,16 @@ const CVPreview = () => {
               willChange: 'transform',
             }}
           >
-            {renderTemplate()}
+            <Suspense fallback={<TemplateFallback />}>
+              <TemplateComponent {...templateProps} />
+            </Suspense>
           </div>
         </div>
       </div>
     </div>
   );
-};
+});
+
+CVPreview.displayName = 'CVPreview';
 
 export default CVPreview;
