@@ -16,6 +16,7 @@ export * from './value-objects/DateRange';
 export * from './value-objects/CVTemplate';
 export * from './value-objects/CVCreationMode';
 export * from './value-objects/PlanFeatures';
+export * from './value-objects/AIUsageLimits';
 
 // Interfaces
 export * from './interfaces/ICVRepository';

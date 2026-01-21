@@ -3,6 +3,7 @@ export { useAnalyzeCV } from './useAnalyzeCV';
 export { useParseCV } from './useParseCV';
 export { useJobMatch } from './useJobMatch';
 export { useImproveText } from './useImproveText';
+export { useAIUsage } from './useAIUsage';
 
 // Re-export types
 export type { AnalyzeCVParams } from './useAnalyzeCV';
