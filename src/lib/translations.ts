@@ -400,6 +400,15 @@ export const translations: Record<Language, Record<string, string>> = {
     'auth.feature2': 'Professional templates',
     'auth.feature3': 'Export to PDF',
     'auth.feature4': 'ATS optimization',
+    // Auth errors (Supabase)
+    'auth.error.invalidCredentials': 'Invalid email or password',
+    'auth.error.userNotFound': 'No account found with this email',
+    'auth.error.emailInUse': 'An account with this email already exists',
+    'auth.error.weakPassword': 'Password is too weak',
+    'auth.error.tooManyRequests': 'Too many attempts. Please wait and try again',
+    'auth.error.networkError': 'Network error. Please check your connection',
+    'auth.error.emailNotConfirmed': 'Please verify your email before signing in',
+    'auth.error.generic': 'An error occurred. Please try again',
     
     // Dashboard
     'nav.dashboard': 'My CVs',
@@ -436,6 +445,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'builder.saveSuccess': 'CV saved successfully',
     'builder.updateSuccess': 'CV updated successfully',
     'builder.saveError': 'Failed to save CV',
+    'builder.saveCVTitle': 'Save Your CV',
+    'builder.saveCVDesc': 'Give your CV a name so you can easily find it later.',
+    'builder.cvNamePlaceholder': 'My Software Engineer CV',
+    'builder.saveCV': 'Save CV',
     
     // Validation
     'validation.required': 'This field is required',
@@ -881,7 +894,16 @@ export const translations: Record<Language, Record<string, string>> = {
     'auth.feature2': 'Profesyonel şablonlar',
     'auth.feature3': 'PDF\'e aktar',
     'auth.feature4': 'ATS optimizasyonu',
-    
+    // Auth errors (Supabase)
+    'auth.error.invalidCredentials': 'Geçersiz e-posta veya şifre',
+    'auth.error.userNotFound': 'Bu e-posta ile kayıtlı hesap bulunamadı',
+    'auth.error.emailInUse': 'Bu e-posta ile zaten bir hesap mevcut',
+    'auth.error.weakPassword': 'Şifre çok zayıf',
+    'auth.error.tooManyRequests': 'Çok fazla deneme. Lütfen bekleyin ve tekrar deneyin',
+    'auth.error.networkError': 'Ağ hatası. Lütfen bağlantınızı kontrol edin',
+    'auth.error.emailNotConfirmed': 'Giriş yapmadan önce e-postanızı doğrulayın',
+    'auth.error.generic': 'Bir hata oluştu. Lütfen tekrar deneyin',
+
     // Dashboard
     'nav.dashboard': 'CV\'lerim',
     'dashboard.title': 'CV\'lerim',
@@ -917,7 +939,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'builder.saveSuccess': 'CV başarıyla kaydedildi',
     'builder.updateSuccess': 'CV başarıyla güncellendi',
     'builder.saveError': 'CV kaydedilemedi',
-    
+    'builder.saveCVTitle': 'CV\'nizi Kaydedin',
+    'builder.saveCVDesc': 'CV\'nize bir isim verin, böylece daha sonra kolayca bulabilirsiniz.',
+    'builder.cvNamePlaceholder': 'Yazılım Mühendisi CV\'m',
+    'builder.saveCV': 'CV\'yi Kaydet',
+
     // Validation
     'validation.required': 'Bu alan zorunludur',
     'validation.email': 'Geçerli bir e-posta adresi girin',
@@ -1127,4 +1153,34 @@ export const languageNames: Record<Language, string> = {
   de: 'Deutsch',
   fr: 'Français',
   es: 'Español',
+};
+
+// Helper function to translate Supabase auth errors
+export const getAuthErrorMessage = (error: any, t: (key: string) => string): string => {
+  const message = error?.message?.toLowerCase() || '';
+
+  if (message.includes('invalid login credentials') || message.includes('invalid password')) {
+    return t('auth.error.invalidCredentials');
+  }
+  if (message.includes('user not found') || message.includes('no user')) {
+    return t('auth.error.userNotFound');
+  }
+  if (message.includes('already registered') || message.includes('already exists') || message.includes('duplicate')) {
+    return t('auth.error.emailInUse');
+  }
+  if (message.includes('weak password') || message.includes('password should be')) {
+    return t('auth.error.weakPassword');
+  }
+  if (message.includes('too many requests') || message.includes('rate limit') || message.includes('after') && message.includes('seconds')) {
+    return t('auth.error.tooManyRequests');
+  }
+  if (message.includes('network') || message.includes('fetch')) {
+    return t('auth.error.networkError');
+  }
+  if (message.includes('email not confirmed') || message.includes('confirm your email')) {
+    return t('auth.error.emailNotConfirmed');
+  }
+
+  // Return the generic error message if no match
+  return t('auth.error.generic');
 };

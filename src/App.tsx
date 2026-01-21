@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { AppProviders } from "@/application";
 import { ErrorBoundary, GlobalErrorHandler } from "@/presentation/components/error";
 import { Suspense } from "@/presentation/components/common";
@@ -40,9 +41,10 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AppProviders>
-        <SettingsProvider>
-          <SubscriptionProvider>
-            <TooltipProvider>
+        <AuthProvider>
+          <SettingsProvider>
+            <SubscriptionProvider>
+              <TooltipProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter>
@@ -60,9 +62,10 @@ const App = () => (
                   </Routes>
                 </GlobalErrorHandler>
               </BrowserRouter>
-            </TooltipProvider>
-          </SubscriptionProvider>
-        </SettingsProvider>
+              </TooltipProvider>
+            </SubscriptionProvider>
+          </SettingsProvider>
+        </AuthProvider>
       </AppProviders>
     </QueryClientProvider>
   </ErrorBoundary>

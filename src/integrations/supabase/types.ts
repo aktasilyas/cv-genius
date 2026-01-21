@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage: {
+        Row: {
+          created_at: string | null
+          function_name: string
+          id: string
+          tokens_used: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          function_name: string
+          id?: string
+          tokens_used?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          function_name?: string
+          id?: string
+          tokens_used?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       cvs: {
         Row: {
           created_at: string
@@ -133,7 +157,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      daily_ai_usage: {
+        Row: {
+          call_count: number | null
+          function_name: string | null
+          total_tokens: number | null
+          usage_date: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

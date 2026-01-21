@@ -12,13 +12,13 @@ serve(async (req) => {
   }
 
   try {
-    // Auth kontrolü - ZORUNLU
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Auth kontrolü
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({
         error: 'Authentication required',
         message: 'Please sign in to use AI features'
@@ -28,9 +28,8 @@ serve(async (req) => {
       });
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
       return new Response(JSON.stringify({
@@ -42,8 +41,8 @@ serve(async (req) => {
       });
     }
 
-    // Kullanıcının plan'ını kontrol et
-    const { data: subscription } = await supabase
+    // Limit kontrolü
+    const { data: subscription } = await supabaseAdmin
       .from('user_subscriptions')
       .select('plan')
       .eq('user_id', user.id)
@@ -52,9 +51,8 @@ serve(async (req) => {
     const isPremium = subscription?.plan === 'premium';
     const dailyLimit = isPremium ? PREMIUM_LIMIT : FREE_LIMIT;
 
-    // Günlük kullanımı kontrol et
     const today = new Date().toISOString().split('T')[0];
-    const { count } = await supabase
+    const { count } = await supabaseAdmin
       .from('ai_usage')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -64,25 +62,16 @@ serve(async (req) => {
     if ((count || 0) >= dailyLimit) {
       return new Response(JSON.stringify({
         error: 'Daily limit reached',
-        message: isPremium
-          ? `You have used all ${dailyLimit} daily text improvements.`
-          : `Free plan allows ${dailyLimit} text improvements per day. Upgrade to Premium for more.`,
-        limit: dailyLimit,
-        used: count,
-        isPremium
+        message: `Daily limit of ${dailyLimit} text improvements reached.`
       }), {
         status: 429,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Request body'yi al
+    // OpenAI çağrısı
     const { text, type, language = 'en' } = await req.json();
     const openAIKey = Deno.env.get('OPENAI_API_KEY');
-
-    if (!openAIKey) {
-      throw new Error('OPENAI_API_KEY not configured');
-    }
 
     const typeInstructions: Record<string, string> = {
       summary: language === 'tr' ? 'Profesyonel CV özeti olarak iyileştir' : 'Improve as a professional CV summary',
@@ -118,35 +107,27 @@ serve(async (req) => {
           { role: 'user', content: text }
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.7
+        temperature: 0.7,
+        max_tokens: 1000
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'OpenAI API error');
+      const err = await response.json();
+      throw new Error(err.error?.message || 'OpenAI error');
     }
 
     const data = await response.json();
     const result = JSON.parse(data.choices[0].message.content);
 
-    // Kullanımı kaydet
-    const tokensUsed = data.usage?.total_tokens || 0;
-    await supabase.from('ai_usage').insert({
+    // Kullanım kaydı
+    await supabaseAdmin.from('ai_usage').insert({
       user_id: user.id,
       function_name: 'improve-text',
-      tokens_used: tokensUsed
+      tokens_used: data.usage?.total_tokens || 0
     });
 
-    // Kalan kullanım bilgisini response'a ekle
-    return new Response(JSON.stringify({
-      ...result,
-      _usage: {
-        remaining: dailyLimit - (count || 0) - 1,
-        limit: dailyLimit,
-        isPremium
-      }
-    }), {
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
