@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Mail, Lock, Loader2, ArrowRight, FileText, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/context/SettingsContext';
+import { getAuthErrorMessage } from '@/lib/translations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -63,7 +64,7 @@ const Login = () => {
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.error(error.message || t('auth.loginError') || 'Failed to sign in');
+      toast.error(getAuthErrorMessage(error, t));
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +76,7 @@ const Login = () => {
       await signInWithGoogle();
     } catch (error: any) {
       console.error('Google login error:', error);
-      toast.error(error.message || 'Failed to sign in with Google');
+      toast.error(getAuthErrorMessage(error, t));
       setIsGoogleLoading(false);
     }
   };
