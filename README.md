@@ -1,35 +1,77 @@
-# CV Genius
+# CV Genius - AI-Powered CV Builder
 
-AI-powered CV builder with professional templates and smart analysis.
+Modern, ATS-friendly CV builder with professional templates and AI-powered analysis. Built with Clean Architecture and SOLID principles.
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+
+## ✨ Features
+
+- 🎨 **6 Professional Templates** - Modern, Classic, Minimal, Creative, Executive, Technical
+- 🤖 **AI-Powered Analysis** - Get instant feedback and suggestions
+- 📊 **ATS Optimization** - Score and improve your CV for applicant tracking systems
+- 💾 **Auto-Save** - Never lose your work with automatic saving
+- 🌍 **i18n Support** - Multi-language support (EN, TR)
+- 📱 **Responsive Design** - Works on all devices
+- 🔐 **Secure** - Built with Supabase authentication and RLS
 
 ## 🏗️ Architecture
 
-CV Genius is built using **Domain-Driven Design (DDD)** and **Clean Architecture** principles.
+CV Genius follows **Clean Architecture** with **Domain-Driven Design (DDD)** principles.
 
 ```
 src/
-├── domain/              # Business logic & rules (framework-agnostic)
-│   ├── entities/        # Business objects
-│   ├── value-objects/   # Immutable values
-│   └── interfaces/      # Repository & service contracts
-├── application/         # Use cases & state management
-│   ├── context/         # React contexts (separated by concern)
-│   ├── hooks/           # Custom hooks & facades
-│   └── providers/       # Provider wrappers
-├── infrastructure/      # External services & data access
-│   ├── repositories/    # Database implementations
-│   └── di/              # Dependency injection
-├── pages/               # Route components
-├── components/          # UI components
-└── services/            # Legacy services (deprecated)
+├── domain/              # Enterprise Business Rules
+│   ├── entities/        # Core business objects (CVData, Experience, etc.)
+│   ├── value-objects/   # Immutable values (SkillLevel, CVTemplate)
+│   └── interfaces/      # Repository contracts (ICVRepository, IAIRepository)
+├── application/         # Application Business Rules
+│   ├── use-cases/       # Single responsibility operations
+│   ├── context/         # React contexts (split by concern)
+│   ├── hooks/           # React Query hooks
+│   ├── errors/          # Error handling system
+│   └── providers/       # Provider composition
+├── infrastructure/      # Frameworks & Drivers
+│   ├── repositories/    # Supabase implementations
+│   ├── di/              # Dependency injection container
+│   └── config/          # Application configuration
+├── presentation/        # Interface Adapters (UI)
+│   ├── components/      # React components
+│   ├── pages/           # Route pages
+│   ├── routes/          # Router configuration
+│   └── hooks/           # UI-specific hooks
+├── shared/              # Shared utilities
+│   ├── lib/             # Utility functions
+│   └── types/           # Shared types
+└── __tests__/           # Tests organized by layer
+    ├── domain/
+    ├── application/
+    ├── presentation/
+    └── mocks/
 ```
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Supabase account
+
 ### Installation
 
 ```bash
+# Clone the repository
+git clone <repo-url>
+cd cv-genius
+
+# Install dependencies
 npm install
+
+# Copy environment variables
+cp .env.example .env
 ```
 
 ### Environment Variables
@@ -42,232 +84,186 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ### Development
 
 ```bash
+# Start development server
 npm run dev
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with UI
+npm run test:ui
 ```
 
 ### Build
 
 ```bash
+# Build for production
 npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 📦 Tech Stack
+
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: TailwindCSS, shadcn/ui
+- **State Management**: TanStack Query, React Context
+- **Backend**: Supabase (Auth, Database, Storage)
+- **Validation**: Zod
+- **Testing**: Vitest, Testing Library
+- **AI**: OpenAI API
+
+## 📜 Scripts
+
+```bash
+npm run dev              # Development server
+npm run build            # Production build
+npm run build:dev        # Development build
+npm run preview          # Preview production build
+npm run lint             # ESLint
+npm run test             # Run tests once
+npm run test:watch       # Run tests in watch mode
+npm run test:ui          # Run tests with UI
+npm run test:coverage    # Generate coverage report
+npm run test:domain      # Run domain tests only
+npm run test:application # Run application tests only
+npm run test:presentation # Run presentation tests only
 ```
 
 ## 📚 Documentation
 
-- [Architecture Overview](ARCHITECTURE.md) - System architecture and design patterns
-- [Domain Layer](src/domain/README.md) - Business entities and rules
-- [Application Layer](src/application/README.md) - State management and hooks
-- [Infrastructure Layer](src/infrastructure/README.md) - Repositories and DI
-- [Migration Guide](MIGRATION_GUIDE.md) - Upgrading from old structure
+- [Architecture Guide](./CLEAN_ARCHITECTURE_COMPLETE.md) - Detailed architecture documentation
+- [Performance Guide](./PERFORMANCE.md) - Performance optimization guide
+- [Testing Guide](./TESTING.md) - Testing strategies and examples
+- [Migration Guide](./MIGRATION_GUIDE.md) - Migration from old to new architecture
+- [Use Cases Guide](./USE_CASES_GUIDE.md) - Use cases documentation
 
-## 🎯 Key Features
+### Additional Docs
 
-### For Users
-- ✅ Professional CV templates
-- ✅ AI-powered content analysis
-- ✅ Job description matching
-- ✅ Real-time preview
-- ✅ PDF export
-- ✅ Version history
-- ✅ LinkedIn import
+- [Contributing Guide](./docs/CONTRIBUTING.md) - How to contribute
+- [API Reference](./docs/API.md) - Hook and API documentation
+- [Architecture Details](./docs/ARCHITECTURE.md) - Layer-by-layer breakdown
 
-### For Developers
-- ✅ Type-safe with TypeScript
-- ✅ Runtime validation with Zod
-- ✅ Repository pattern
-- ✅ Dependency injection
-- ✅ Clean architecture
-- ✅ Comprehensive testing
-- ✅ Well-documented codebase
+## 🧪 Testing
 
-## 🏛️ Architecture Highlights
+CV Genius has comprehensive test coverage across all layers:
 
-### Domain-Driven Design
+```bash
+# Run all tests
+npm test
 
-**Entities** with validation:
-```typescript
-import { createExperience, ExperienceSchema } from '@/domain';
+# Run with coverage
+npm run test:coverage
 
-const experience = createExperience({
-  company: 'Tech Corp',
-  position: 'Developer'
-});
-
-// Runtime validation
-const result = ExperienceSchema.safeParse(data);
+# Run specific layer tests
+npm run test:domain
+npm run test:application
+npm run test:presentation
 ```
 
-**Value Objects** for type safety:
-```typescript
-import { SkillLevel, LanguageProficiency } from '@/domain';
+**Coverage Targets**:
+- Domain Layer: 90%+
+- Application Layer: 80%+
+- Infrastructure Layer: 70%+
+- Presentation Layer: 60%+
 
-const level: SkillLevel = 'advanced'; // Type-safe
+## 🎯 Key Concepts
+
+### Clean Architecture
+
+Dependencies flow inward:
+```
+Presentation → Application → Domain ← Infrastructure
+```
+
+Domain layer has zero dependencies - pure business logic.
+
+### Path Aliases
+
+```typescript
+import { CVData } from '@domain/entities';
+import { useUserCVs } from '@application/hooks/cv';
+import { SupabaseCVRepository } from '@infrastructure/repositories';
+import { ErrorBoundary } from '@presentation/components/error';
+import { cn } from '@shared/lib';
+```
+
+### Use Case Pattern
+
+```typescript
+// Single responsibility business logic
+export class CreateCVUseCase {
+  constructor(private readonly repository: ICVRepository) {}
+
+  async execute(input: CreateCVInput): Promise<CreateCVOutput> {
+    // Validation
+    // Business logic
+    // Repository call
+  }
+}
 ```
 
 ### Repository Pattern
 
-Clean separation of concerns:
 ```typescript
-import { getCVRepository } from '@/infrastructure';
-
-const repo = getCVRepository();
-const cvs = await repo.getAll();
-await repo.create('My CV', cvData, 'modern');
-```
-
-### Context Separation
-
-Organized state management:
-```typescript
-import { useCV } from '@/application';
-
-function MyComponent() {
-  const {
-    cvData,        // From CVDataContext
-    addExperience, // From CVActionsContext
-    currentStep,   // From CVUIContext
-    aiFeedback,    // From AIContext
-    versions       // From VersionContext
-  } = useCV();
+// Domain interface
+export interface ICVRepository {
+  getAll(): Promise<SavedCV[]>;
+  create(data: CVData): Promise<SavedCV>;
 }
-```
 
-## 🔄 Migration from Old Code
-
-### Old Way (Deprecated)
-```typescript
-import { useCVContext } from '@/context/CVContext';
-import { cvService } from '@/services/cvService';
-import { CVData } from '@/types/cv';
-
-const { cvData } = useCVContext();
-const cvs = await cvService.getUserCVs();
-```
-
-### New Way (Recommended)
-```typescript
-import { useCV } from '@/application';
-import { getCVRepository } from '@/infrastructure';
-import { CVData } from '@/domain';
-
-const { cvData } = useCV();
-const repo = getCVRepository();
-const cvs = await repo.getAll();
-```
-
-**Note:** Old imports still work but are deprecated for backward compatibility.
-
-## 🧪 Testing
-
-### Unit Tests (Domain)
-```typescript
-import { createExperience } from '@/domain';
-
-describe('createExperience', () => {
-  it('should generate ID automatically', () => {
-    const exp = createExperience({});
-    expect(exp.id).toBeDefined();
-  });
-});
-```
-
-### Integration Tests (Application)
-```typescript
-import { renderHook } from '@testing-library/react';
-import { useCV } from '@/application';
-
-describe('useCV', () => {
-  it('should add experience', () => {
-    const { result } = renderHook(() => useCV());
-    act(() => result.current.addExperience());
-    expect(result.current.cvData.experience).toHaveLength(1);
-  });
-});
-```
-
-## 📦 Key Dependencies
-
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Zod** - Runtime validation
-- **Tailwind CSS** - Styling
-- **Shadcn/ui** - UI components
-- **Supabase** - Backend (database, auth, storage)
-- **React Query** - Server state management
-- **React PDF** - PDF generation
-
-## 🎨 Available Templates
-
-### Free Templates
-- Modern
-- Classic
-
-### Premium Templates
-- Minimal
-- Creative
-- Executive
-- Technical
-
-## 💳 Pricing
-
-| Feature | Free | Premium |
-|---------|------|---------|
-| Templates | 2 | 6 |
-| Max CVs | 1 | Unlimited |
-| AI Analysis | ❌ | ✅ |
-| Job Matching | ❌ | ✅ |
-| Version History | ❌ | ✅ |
-| Watermark Free | ❌ | ✅ |
-
-**Premium:** 59₺/month or 499₺/year (~42₺/month)
-
-## 🏗️ Project Structure
-
-```
-cv-genius/
-├── src/
-│   ├── domain/              # 🎯 Business logic (pure)
-│   │   ├── entities/        # CVData, Experience, etc.
-│   │   ├── value-objects/   # SkillLevel, LanguageProficiency
-│   │   └── interfaces/      # ICVRepository, IAIService
-│   ├── application/         # 🔄 State & use cases
-│   │   ├── context/         # React contexts
-│   │   ├── hooks/           # Custom hooks
-│   │   └── providers/       # Provider wrappers
-│   ├── infrastructure/      # 🔌 External services
-│   │   ├── repositories/    # Supabase implementations
-│   │   └── di/              # Dependency injection
-│   ├── pages/               # 📄 Route components
-│   ├── components/          # 🎨 UI components
-│   ├── templates/           # 📋 CV templates
-│   └── services/            # ⚠️ Legacy (deprecated)
-├── ARCHITECTURE.md          # Architecture guide
-├── MIGRATION_GUIDE.md       # Migration instructions
-└── README.md               # This file
+// Infrastructure implementation
+export class SupabaseCVRepository implements ICVRepository {
+  async getAll() { /* Supabase-specific */ }
+  async create(data: CVData) { /* Supabase-specific */ }
+}
 ```
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please read our [Contributing Guide](./docs/CONTRIBUTING.md) first.
 
-### Code Style
+### Branch Strategy
 
-- Follow Clean Architecture principles
-- Use Domain-Driven Design patterns
-- Write type-safe code with TypeScript
-- Add Zod validation for data
-- Write tests for new features
-- Document complex logic
+- `main` - Production
+- `develop` - Development
+- `feature/*` - New features
+- `fix/*` - Bug fixes
+- `refactor/*` - Code improvements
+- `docs/*` - Documentation
 
-## 📧 Project Info
+### Commit Convention
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-For more information about deployment and custom domains, visit [Lovable Documentation](https://docs.lovable.dev/).
+```
+feat: add new feature
+fix: bug fix
+refactor: code restructuring
+test: add/update tests
+docs: documentation
+chore: maintenance
+```
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🙏 Acknowledgments
+
+- [shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
+- [Supabase](https://supabase.com/) - Backend infrastructure
+- [TanStack Query](https://tanstack.com/query) - Data fetching and state management
+- [Zod](https://zod.dev/) - Schema validation
+
+## 📞 Support
+
+For issues and questions:
+- Open an [Issue](https://github.com/your-repo/issues)
+- Check [Documentation](./docs/)
+- Read [FAQ](./docs/FAQ.md)
 
 ---
 
-**Made with ❤️ using Clean Architecture & DDD**
+Built with ❤️ using Clean Architecture principles
