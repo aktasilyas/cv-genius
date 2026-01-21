@@ -1,140 +1,115 @@
-import { supabase } from '@/integrations/supabase/client';
-import { CVData, CVTemplate } from '@/types/cv';
-import { Json } from '@/integrations/supabase/types';
+/**
+ * @deprecated Use ICVRepository from '@/infrastructure' instead
+ * This file is kept for backwards compatibility
+ */
 
+import { getCVRepository } from '@/infrastructure';
+import { CVData, CVTemplateType } from '@/domain';
+
+// Legacy interface for backward compatibility
 export interface SavedCV {
   id: string;
   user_id: string;
   title: string;
   cv_data: CVData;
-  selected_template: CVTemplate;
+  selected_template: CVTemplateType;
   is_default: boolean | null;
   created_at: string;
   updated_at: string;
 }
 
+/**
+ * @deprecated Use getCVRepository() from '@/infrastructure' instead
+ */
 export const cvService = {
-  // Get all CVs for the current user
   async getUserCVs(): Promise<SavedCV[]> {
-    const { data, error } = await supabase
-      .from('cvs')
-      .select('*')
-      .order('updated_at', { ascending: false });
-
-    if (error) throw error;
-    return (data || []).map(cv => ({
-      ...cv,
-      cv_data: cv.cv_data as unknown as CVData,
-      selected_template: cv.selected_template as CVTemplate,
+    const repo = getCVRepository();
+    const cvs = await repo.getAll();
+    return cvs.map(cv => ({
+      id: cv.id,
+      user_id: cv.userId,
+      title: cv.title,
+      cv_data: cv.cvData,
+      selected_template: cv.selectedTemplate,
+      is_default: cv.isDefault,
+      created_at: cv.createdAt.toISOString(),
+      updated_at: cv.updatedAt.toISOString()
     }));
   },
 
-  // Get a single CV by ID
   async getCVById(id: string): Promise<SavedCV | null> {
-    const { data, error } = await supabase
-      .from('cvs')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw error;
-    }
+    const repo = getCVRepository();
+    const cv = await repo.getById(id);
+    if (!cv) return null;
     return {
-      ...data,
-      cv_data: data.cv_data as unknown as CVData,
-      selected_template: data.selected_template as CVTemplate,
+      id: cv.id,
+      user_id: cv.userId,
+      title: cv.title,
+      cv_data: cv.cvData,
+      selected_template: cv.selectedTemplate,
+      is_default: cv.isDefault,
+      created_at: cv.createdAt.toISOString(),
+      updated_at: cv.updatedAt.toISOString()
     };
   },
 
-  // Create a new CV
-  async createCV(title: string, cvData: CVData, template: CVTemplate): Promise<SavedCV> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const insertData = {
-      user_id: user.id,
-      title,
-      cv_data: cvData as unknown as Json,
-      selected_template: template,
-    };
-
-    const { data, error } = await supabase
-      .from('cvs')
-      .insert(insertData)
-      .select()
-      .single();
-
-    if (error) throw error;
+  async createCV(title: string, cvData: CVData, template: CVTemplateType): Promise<SavedCV> {
+    const repo = getCVRepository();
+    const cv = await repo.create(title, cvData, template);
     return {
-      ...data,
-      cv_data: data.cv_data as unknown as CVData,
-      selected_template: data.selected_template as CVTemplate,
+      id: cv.id,
+      user_id: cv.userId,
+      title: cv.title,
+      cv_data: cv.cvData,
+      selected_template: cv.selectedTemplate,
+      is_default: cv.isDefault,
+      created_at: cv.createdAt.toISOString(),
+      updated_at: cv.updatedAt.toISOString()
     };
   },
 
-  // Update an existing CV
-  async updateCV(id: string, updates: Partial<{ title: string; cv_data: CVData; selected_template: CVTemplate }>): Promise<SavedCV> {
-    const updateData: Record<string, unknown> = {};
-    if (updates.title !== undefined) updateData.title = updates.title;
-    if (updates.cv_data !== undefined) updateData.cv_data = updates.cv_data as unknown as Json;
-    if (updates.selected_template !== undefined) updateData.selected_template = updates.selected_template;
+  async updateCV(id: string, updates: Partial<{ title: string; cv_data: CVData; selected_template: CVTemplateType }>): Promise<SavedCV> {
+    const repo = getCVRepository();
+    const repoUpdates: any = {};
+    if (updates.title !== undefined) repoUpdates.title = updates.title;
+    if (updates.cv_data !== undefined) repoUpdates.cvData = updates.cv_data;
+    if (updates.selected_template !== undefined) repoUpdates.selectedTemplate = updates.selected_template;
 
-    const { data, error } = await supabase
-      .from('cvs')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
+    const cv = await repo.update(id, repoUpdates);
     return {
-      ...data,
-      cv_data: data.cv_data as unknown as CVData,
-      selected_template: data.selected_template as CVTemplate,
+      id: cv.id,
+      user_id: cv.userId,
+      title: cv.title,
+      cv_data: cv.cvData,
+      selected_template: cv.selectedTemplate,
+      is_default: cv.isDefault,
+      created_at: cv.createdAt.toISOString(),
+      updated_at: cv.updatedAt.toISOString()
     };
   },
 
-  // Delete a CV
   async deleteCV(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('cvs')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    const repo = getCVRepository();
+    await repo.delete(id);
   },
 
-  // Set a CV as default
   async setDefaultCV(id: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    // First, unset all defaults for this user
-    await supabase
-      .from('cvs')
-      .update({ is_default: false })
-      .eq('user_id', user.id);
-
-    // Then set the new default
-    const { error } = await supabase
-      .from('cvs')
-      .update({ is_default: true })
-      .eq('id', id);
-
-    if (error) throw error;
+    const repo = getCVRepository();
+    await repo.setDefault(id);
   },
 
-  // Duplicate a CV
   async duplicateCV(id: string): Promise<SavedCV> {
-    const original = await this.getCVById(id);
-    if (!original) throw new Error('CV not found');
-
-    return this.createCV(
-      `${original.title} (Copy)`,
-      original.cv_data,
-      original.selected_template
-    );
-  },
+    const repo = getCVRepository();
+    const cv = await repo.duplicate(id);
+    return {
+      id: cv.id,
+      user_id: cv.userId,
+      title: cv.title,
+      cv_data: cv.cvData,
+      selected_template: cv.selectedTemplate,
+      is_default: cv.isDefault,
+      created_at: cv.createdAt.toISOString(),
+      updated_at: cv.updatedAt.toISOString()
+    };
+  }
 };

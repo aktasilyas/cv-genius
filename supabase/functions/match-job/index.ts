@@ -1,130 +1,74 @@
+import "https://deno.land/x/xhr@0.3.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders } from "../_shared/cors.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { cvData, jobDescription, language = 'en' } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const openAIKey = Deno.env.get('OPENAI_API_KEY');
+
+    if (!openAIKey) {
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const languageInstructions = {
-      en: "Respond in English.",
-      tr: "Türkçe yanıt ver.",
-      de: "Antworte auf Deutsch.",
-      fr: "Réponds en français.",
-      es: "Responde en español."
-    };
+    const systemPrompt = language === 'tr'
+      ? `CV ile iş ilanını karşılaştır ve JSON formatında yanıt ver:
+{
+  "score": 0-100,
+  "matchedKeywords": ["eşleşen", "anahtar", "kelimeler"],
+  "missingKeywords": ["eksik", "anahtar", "kelimeler"],
+  "suggestions": ["CV'yi iyileştirmek için öneriler"],
+  "optimizedSummary": "İş ilanına göre optimize edilmiş özet",
+  "optimizedSkills": ["önerilen", "yeni", "beceriler"]
+}`
+      : `Compare the CV with the job description and respond in JSON format:
+{
+  "score": 0-100,
+  "matchedKeywords": ["matched", "key", "words"],
+  "missingKeywords": ["missing", "key", "words"],
+  "suggestions": ["Suggestions to improve CV for this job"],
+  "optimizedSummary": "Optimized summary for the job",
+  "optimizedSkills": ["suggested", "new", "skills"]
+}`;
 
-    const systemPrompt = `You are an expert ATS (Applicant Tracking System) analyst and career consultant. Compare the provided CV against the job description.
+    const userContent = `CV:\n${JSON.stringify(cvData)}\n\nJob Description:\n${jobDescription}`;
 
-${languageInstructions[language as keyof typeof languageInstructions] || languageInstructions.en}
-
-Analyze:
-1. Keyword matching between CV and job description
-2. Skills alignment
-3. Experience relevance
-4. Missing qualifications
-
-Provide specific, actionable suggestions to improve the CV for this job.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+        'Authorization': `Bearer ${openAIKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: 'gpt-4o-mini',
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Compare this CV against the job description and provide optimization suggestions:\n\nCV DATA:\n${JSON.stringify(cvData, null, 2)}\n\nJOB DESCRIPTION:\n${jobDescription}` }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userContent }
         ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "provide_job_match_analysis",
-              description: "Provide job matching analysis and optimization suggestions",
-              parameters: {
-                type: "object",
-                properties: {
-                  score: { type: "number", minimum: 0, maximum: 100 },
-                  matchedKeywords: {
-                    type: "array",
-                    items: { type: "string" }
-                  },
-                  missingKeywords: {
-                    type: "array",
-                    items: { type: "string" }
-                  },
-                  suggestions: {
-                    type: "array",
-                    items: { type: "string" }
-                  },
-                  optimizedSummary: { type: "string" },
-                  optimizedSkills: {
-                    type: "array",
-                    items: { type: "string" }
-                  }
-                },
-                required: ["score", "matchedKeywords", "missingKeywords", "suggestions"]
-              }
-            }
-          }
-        ],
-        tool_choice: { type: "function", function: { name: "provide_job_match_analysis" } }
+        response_format: { type: 'json_object' },
+        temperature: 0.5
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
+      const error = await response.json();
+      throw new Error(error.error?.message || 'OpenAI API error');
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    
-    if (!toolCall) {
-      throw new Error("No tool call in response");
-    }
-
-    const result = JSON.parse(toolCall.function.arguments);
+    const result = JSON.parse(data.choices[0].message.content);
 
     return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
   } catch (error) {
-    console.error("match-job error:", error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Unknown error" 
-    }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
