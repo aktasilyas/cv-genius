@@ -1,8 +1,11 @@
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { Camera, X, User } from 'lucide-react';
 import { useCVContext } from '@/context/CVContext';
 import { useSettings } from '@/context/SettingsContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { useFormValidation, ValidationRules } from '@/hooks/useFormValidation';
 
 const PersonalInfoStep = () => {
@@ -10,6 +13,35 @@ const PersonalInfoStep = () => {
   const { t, language } = useSettings();
   const { validateField, markTouched, isTouched } = useFormValidation();
   const { personalInfo } = cvData;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        return;
+      }
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        updatePersonalInfo('photo', result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    updatePersonalInfo('photo', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   // Localized placeholders
   const getPlaceholder = (key: string): string => {
@@ -94,6 +126,63 @@ const PersonalInfoStep = () => {
         <p className="text-sm text-muted-foreground">
           {t('builder.personalInfoDesc') || "Let's start with your basic details"}
         </p>
+      </div>
+
+      {/* Photo Upload Section */}
+      <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/30">
+        <div className="relative">
+          <div
+            className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-muted border-2 border-dashed border-muted-foreground/30"
+          >
+            {personalInfo.photo ? (
+              <img
+                src={personalInfo.photo}
+                alt={personalInfo.fullName || 'Profile'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-8 h-8 text-muted-foreground" />
+            )}
+          </div>
+          {personalInfo.photo && (
+            <button
+              onClick={handleRemovePhoto}
+              className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:bg-destructive/90"
+              title={t('field.removePhoto') || 'Remove photo'}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+        <div className="flex-1">
+          <Label className="text-sm font-medium mb-1 block">
+            {t('field.photo') || 'Profile Photo'}
+          </Label>
+          <p className="text-xs text-muted-foreground mb-2">
+            {t('field.photoDesc') || 'Optional. Max 2MB, JPG or PNG'}
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            className="hidden"
+            id="photo-upload"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-2"
+          >
+            <Camera className="w-4 h-4" />
+            {personalInfo.photo
+              ? (t('field.changePhoto') || 'Change Photo')
+              : (t('field.uploadPhoto') || 'Upload Photo')
+            }
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">

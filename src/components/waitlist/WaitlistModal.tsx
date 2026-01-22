@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Sparkles, 
-  Mail, 
-  User, 
-  Briefcase, 
+import {
+  Sparkles,
+  Mail,
+  User,
+  Briefcase,
   Check,
   Bell,
   Gift,
   Zap,
-  ArrowRight
+  ArrowRight,
+  X
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -24,22 +25,23 @@ import { toast } from 'sonner';
 interface WaitlistModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   feature?: string;
   source?: string;
 }
 
-const industries = [
-  { value: 'tech', label: 'Technology / Software' },
-  { value: 'finance', label: 'Finance / Banking' },
-  { value: 'marketing', label: 'Marketing / Creative' },
-  { value: 'healthcare', label: 'Healthcare' },
-  { value: 'education', label: 'Education' },
-  { value: 'engineering', label: 'Engineering' },
-  { value: 'sales', label: 'Sales / Business' },
-  { value: 'other', label: 'Other' },
+const industryKeys = [
+  'tech',
+  'finance',
+  'marketing',
+  'healthcare',
+  'education',
+  'engineering',
+  'sales',
+  'other',
 ];
 
-const WaitlistModal = ({ isOpen, onClose, feature, source = 'app' }: WaitlistModalProps) => {
+const WaitlistModal = ({ isOpen, onClose, onSuccess, feature, source = 'app' }: WaitlistModalProps) => {
   const { t, language } = useSettings();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -101,6 +103,14 @@ const WaitlistModal = ({ isOpen, onClose, feature, source = 'app' }: WaitlistMod
         {/* Header */}
         <div className="relative bg-gradient-to-br from-primary via-primary/90 to-accent p-6 text-primary-foreground">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent)]" />
+          {/* Close Button */}
+          <button
+            onClick={handleClose}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors z-10"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
           <div className="relative">
             <Badge className="mb-3 bg-white/20 text-white border-white/30">
               <Sparkles className="w-3 h-3 mr-1" />
@@ -142,7 +152,15 @@ const WaitlistModal = ({ isOpen, onClose, feature, source = 'app' }: WaitlistMod
             <p className="text-muted-foreground mb-6">
               {t('waitlist.successMessage') || "We'll email you when Premium launches with your exclusive discount."}
             </p>
-            <Button onClick={handleClose} className="gap-2">
+            <Button
+              onClick={() => {
+                if (onSuccess) {
+                  onSuccess();
+                }
+                handleClose();
+              }}
+              className="gap-2"
+            >
               {t('waitlist.continue') || 'Continue Building'}
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -222,9 +240,9 @@ const WaitlistModal = ({ isOpen, onClose, feature, source = 'app' }: WaitlistMod
                     <SelectValue placeholder={t('waitlist.selectIndustry') || 'Select your industry'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {industries.map((ind) => (
-                      <SelectItem key={ind.value} value={ind.value}>
-                        {ind.label}
+                    {industryKeys.map((key) => (
+                      <SelectItem key={key} value={key}>
+                        {t(`waitlist.industry.${key}`) || key}
                       </SelectItem>
                     ))}
                   </SelectContent>

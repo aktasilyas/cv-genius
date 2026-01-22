@@ -1,5 +1,5 @@
 import { CVData, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
-import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
+import { Mail, Phone, MapPin, Linkedin, Globe, Award, User } from 'lucide-react';
 import { Language } from '@/lib/translations';
 
 interface ModernTemplateProps {
@@ -279,17 +279,42 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       style={styles}
     >
       {/* Header */}
-      <header 
+      <header
         className="pb-6 mb-6"
         style={borderStyle}
       >
-        <h1 className="font-bold mb-1" style={headingStyle}>
-          {personalInfo.fullName || 'Your Name'}
-        </h1>
-        <p className="font-medium mb-4" style={{ ...accentStyle, fontSize: fontSizeMap[customization.fontSize].subheading }}>
-          {personalInfo.title || 'Professional Title'}
-        </p>
-        <div className="flex flex-wrap gap-4 text-xs" style={{ color: `${customization.textColor}99` }}>
+        <div className="flex items-start gap-4">
+          {/* Photo - only show if photo exists */}
+          {customization.showPhoto && personalInfo.photo && (
+            <div
+              className="flex-shrink-0"
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: customization.photoShape === 'circle' ? '50%' :
+                             customization.photoShape === 'rounded' ? '8px' : '0',
+                overflow: 'hidden',
+                border: `2px solid ${customization.primaryColor}`,
+              }}
+            >
+              <img
+                src={personalInfo.photo}
+                alt={personalInfo.fullName || 'Profile'}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          )}
+
+          <div className="flex-1">
+            <h1 className="font-bold mb-1" style={headingStyle}>
+              {personalInfo.fullName || 'Your Name'}
+            </h1>
+            <p className="font-medium mb-4" style={{ ...accentStyle, fontSize: fontSizeMap[customization.fontSize].subheading }}>
+              {personalInfo.title || 'Professional Title'}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-4 text-xs" style={{ color: `${customization.textColor}99`, marginTop: customization.showPhoto && personalInfo.photo ? '12px' : '0' }}>
           {personalInfo.email && (
             <span className="flex items-center gap-1">
               <Mail className="w-3 h-3" />

@@ -1,5 +1,5 @@
 import { CVData, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
-import { Mail, Phone, MapPin, Linkedin, Globe, Award } from 'lucide-react';
+import { Mail, Phone, MapPin, Linkedin, Globe, Award, User } from 'lucide-react';
 import { Language } from '@/lib/translations';
 
 interface ClassicTemplateProps {
@@ -68,14 +68,34 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
       }}
     >
       {/* Header */}
-      <header 
+      <header
         className="text-center pb-6 mb-6"
-        style={{ 
+        style={{
           borderBottomWidth: borderMap[customization.borderStyle],
           borderColor: customization.textColor
         }}
       >
-        <h1 
+        {/* Photo - only show if photo exists */}
+        {customization.showPhoto && personalInfo.photo && (
+          <div
+            className="mx-auto mb-4"
+            style={{
+              width: '100px',
+              height: '100px',
+              borderRadius: customization.photoShape === 'circle' ? '50%' :
+                           customization.photoShape === 'rounded' ? '8px' : '0',
+              overflow: 'hidden',
+              border: `2px solid ${customization.textColor}40`,
+            }}
+          >
+            <img
+              src={personalInfo.photo}
+              alt={personalInfo.fullName || 'Profile'}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+        )}
+        <h1
           className="font-bold tracking-wide mb-2"
           style={{ fontSize: fontSizeMap[customization.fontSize].heading, color: customization.textColor }}
         >
