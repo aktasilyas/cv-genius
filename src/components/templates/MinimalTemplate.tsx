@@ -1,5 +1,5 @@
 import { CVData, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
-import { Award } from 'lucide-react';
+import { Award, User } from 'lucide-react';
 import { Language } from '@/lib/translations';
 
 interface MinimalTemplateProps {
@@ -60,15 +60,39 @@ const MinimalTemplate: React.FC<MinimalTemplateProps> = ({
     >
       {/* Header */}
       <header style={{ marginBottom: spacingMap[customization.spacing] }}>
-        <h1 
-          className="font-light tracking-tight mb-1"
-          style={{ fontSize: fontSizeMap[customization.fontSize].heading, color: customization.textColor }}
-        >
-          {personalInfo.fullName || 'Your Name'}
-        </h1>
-        <p className="mb-4" style={{ fontSize: '16px', color: `${customization.textColor}80` }}>
-          {personalInfo.title || 'Professional Title'}
-        </p>
+        <div className="flex items-start gap-4">
+          {/* Photo - only show if photo exists */}
+          {customization.showPhoto && personalInfo.photo && (
+            <div
+              className="flex-shrink-0"
+              style={{
+                width: '70px',
+                height: '70px',
+                borderRadius: customization.photoShape === 'circle' ? '50%' :
+                             customization.photoShape === 'rounded' ? '6px' : '0',
+                overflow: 'hidden',
+                border: `1px solid ${customization.textColor}20`,
+              }}
+            >
+              <img
+                src={personalInfo.photo}
+                alt={personalInfo.fullName || 'Profile'}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          )}
+          <div className="flex-1">
+            <h1
+              className="font-light tracking-tight mb-1"
+              style={{ fontSize: fontSizeMap[customization.fontSize].heading, color: customization.textColor }}
+            >
+              {personalInfo.fullName || 'Your Name'}
+            </h1>
+            <p className="mb-4" style={{ fontSize: '16px', color: `${customization.textColor}80` }}>
+              {personalInfo.title || 'Professional Title'}
+            </p>
+          </div>
+        </div>
         <div className="flex flex-wrap gap-4 text-xs" style={{ color: `${customization.textColor}80` }}>
           {personalInfo.email && <span>{personalInfo.email}</span>}
           {personalInfo.phone && <span>•</span>}

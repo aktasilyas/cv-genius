@@ -1,5 +1,5 @@
 import { CVData, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
-import { Award } from 'lucide-react';
+import { Award, User } from 'lucide-react';
 import { Language } from '@/lib/translations';
 
 interface TechnicalTemplateProps {
@@ -75,21 +75,43 @@ const TechnicalTemplate: React.FC<TechnicalTemplateProps> = ({
       }}
     >
       {/* Header */}
-      <header 
+      <header
         className="mb-6 pb-4"
-        style={{ 
+        style={{
           borderBottomWidth: borderMap[customization.borderStyle],
           borderColor: customization.primaryColor
         }}
       >
         <div className="flex items-start justify-between">
-          <div>
-            <h1 className="font-bold" style={{ fontSize: fontSizeMap[customization.fontSize].heading, color: customization.textColor }}>
-              {personalInfo.fullName || 'Your Name'}
-            </h1>
-            <p className="text-lg font-medium" style={{ color: customization.primaryColor }}>
-              {personalInfo.title || 'Professional Title'}
-            </p>
+          <div className="flex items-start gap-4">
+            {/* Photo - only show if photo exists */}
+            {customization.showPhoto && personalInfo.photo && (
+              <div
+                className="flex-shrink-0"
+                style={{
+                  width: '70px',
+                  height: '70px',
+                  borderRadius: customization.photoShape === 'circle' ? '50%' :
+                               customization.photoShape === 'rounded' ? '6px' : '0',
+                  overflow: 'hidden',
+                  border: `2px solid ${customization.primaryColor}`,
+                }}
+              >
+                <img
+                  src={personalInfo.photo}
+                  alt={personalInfo.fullName || 'Profile'}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
+            )}
+            <div>
+              <h1 className="font-bold" style={{ fontSize: fontSizeMap[customization.fontSize].heading, color: customization.textColor }}>
+                {personalInfo.fullName || 'Your Name'}
+              </h1>
+              <p className="text-lg font-medium" style={{ color: customization.primaryColor }}>
+                {personalInfo.title || 'Professional Title'}
+              </p>
+            </div>
           </div>
           <div className="text-right text-xs space-y-1" style={{ color: `${customization.textColor}99` }}>
             {personalInfo.email && <div className="font-mono">{personalInfo.email}</div>}

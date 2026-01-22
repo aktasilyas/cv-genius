@@ -1,5 +1,5 @@
 import { CVData, TemplateCustomization, defaultTemplateCustomization } from '@/types/cv';
-import { Award } from 'lucide-react';
+import { Award, User } from 'lucide-react';
 import { Language } from '@/lib/translations';
 
 interface CreativeTemplateProps {
@@ -66,12 +66,36 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
     >
       {/* Colorful Header */}
       <header className="text-white p-8" style={gradientStyle}>
-        <h1 className="font-bold mb-2" style={{ fontSize: fontSizeMap[customization.fontSize].heading }}>
-          {personalInfo.fullName || 'Your Name'}
-        </h1>
-        <p className="text-xl text-white/90 mb-4">
-          {personalInfo.title || 'Professional Title'}
-        </p>
+        <div className="flex items-start gap-4">
+          {/* Photo - only show if photo exists */}
+          {customization.showPhoto && personalInfo.photo && (
+            <div
+              className="flex-shrink-0"
+              style={{
+                width: '90px',
+                height: '90px',
+                borderRadius: customization.photoShape === 'circle' ? '50%' :
+                             customization.photoShape === 'rounded' ? '8px' : '0',
+                overflow: 'hidden',
+                border: '3px solid rgba(255,255,255,0.5)',
+              }}
+            >
+              <img
+                src={personalInfo.photo}
+                alt={personalInfo.fullName || 'Profile'}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          )}
+          <div className="flex-1">
+            <h1 className="font-bold mb-2" style={{ fontSize: fontSizeMap[customization.fontSize].heading }}>
+              {personalInfo.fullName || 'Your Name'}
+            </h1>
+            <p className="text-xl text-white/90 mb-4">
+              {personalInfo.title || 'Professional Title'}
+            </p>
+          </div>
+        </div>
         <div className="flex flex-wrap gap-4 text-white/80 text-xs">
           {personalInfo.email && <span>✉ {personalInfo.email}</span>}
           {personalInfo.phone && <span>☎ {personalInfo.phone}</span>}

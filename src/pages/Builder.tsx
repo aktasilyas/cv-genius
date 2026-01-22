@@ -29,7 +29,6 @@ import CVPreview from '@/components/builder/CVPreview';
 import AIAnalysisPanel from '@/components/builder/AIAnalysisPanel';
 import AITextInputPanel from '@/components/builder/AITextInputPanel';
 import LinkedInImportPanel from '@/components/builder/LinkedInImportPanel';
-import TemplateSelector from '@/components/builder/TemplateSelector';
 import SectionControlPanel from '@/components/builder/SectionControlPanel';
 import VersionHistoryPanel from '@/components/builder/VersionHistoryPanel';
 import JobMatchPanel from '@/components/builder/JobMatchPanel';
@@ -104,43 +103,64 @@ const BuilderContent = () => {
       setShowAuthModal(true);
       return;
     }
-    exportToPDF();
-  };
-
-  const exportToPDF = async () => {
-    // In waitlist mode, show waitlist modal for watermark-free export
+    // Show waitlist modal for non-premium users, then allow PDF export
     if (isFeatureRestricted('pdfExport')) {
       setShowWaitlist(true);
       return;
     }
+    exportToPDF();
+  };
 
+  const exportToPDF = async (withWatermark: boolean = false) => {
     setIsExporting(true);
-      
+
     try {
       // Find the preview element directly from DOM
       const previewElement = document.getElementById('cv-preview-content');
-      
+
       if (previewElement) {
         // Clone the element for PDF generation
         const clone = previewElement.cloneNode(true) as HTMLElement;
         clone.style.transform = 'none';
-        clone.style.width = '210mm';
-        clone.style.minHeight = '297mm';
+        clone.style.width = '794px';
+        clone.style.height = '1123px'; // Fixed height to prevent extra page
+        clone.style.maxHeight = '1123px';
+        clone.style.overflow = 'hidden';
         clone.style.margin = '0';
         clone.style.padding = '0';
-        
+        clone.style.position = 'relative';
+
+        // Add watermark for free users
+        if (withWatermark) {
+          const watermark = document.createElement('div');
+          watermark.style.cssText = `
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            font-size: 10px;
+            color: rgba(0, 0, 0, 0.4);
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+            pointer-events: none;
+          `;
+          watermark.textContent = 'Created with CVCraft';
+          clone.appendChild(watermark);
+        }
+
         const opt = {
           margin: 0,
           filename: `${cvData.personalInfo.fullName || 'CV'}_Resume.pdf`,
           image: { type: 'jpeg' as const, quality: 0.98 },
-          html2canvas: { 
-            scale: 2, 
+          html2canvas: {
+            scale: 2,
             useCORS: true,
             logging: false,
-            width: 794, // A4 width in pixels at 96dpi
-            height: 1123, // A4 height in pixels at 96dpi
+            width: 794,
+            height: 1123,
+            windowWidth: 794,
+            windowHeight: 1123,
           },
-          jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+          jsPDF: { unit: 'px' as const, format: [794, 1123] as const, orientation: 'portrait' as const, hotfixes: ['px_scaling'] }
         };
 
         await html2pdf().set(opt).from(clone).save();
@@ -297,6 +317,10 @@ const BuilderContent = () => {
       <WaitlistModal
         isOpen={showWaitlist}
         onClose={() => setShowWaitlist(false)}
+        onSuccess={() => {
+          // After successful waitlist registration, export PDF with watermark
+          exportToPDF(true);
+        }}
         feature={t('premium.noWatermark') || 'Watermark-Free PDF Export'}
         source="pdf-export"
       />
@@ -384,20 +408,6 @@ const BuilderContent = () => {
           </div>
         ) : (
           <>
-            {/* Template Selector - Collapsible on Mobile */}
-            <div className="mb-4 sm:mb-8 p-3 sm:p-6 card-elevated">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
-                    <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                    {t('template.choose') || 'Choose Template'}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">{t('template.chooseDesc') || 'Select a template that best fits your style'}</p>
-                </div>
-              </div>
-              <TemplateSelector compact />
-            </div>
-
             {/* Progress Steps - Scrollable on Mobile */}
             <div className="mb-4 sm:mb-8">
               <div className="flex items-center justify-between max-w-3xl mx-auto overflow-x-auto pb-2 gap-1 sm:gap-0 scrollbar-hide">

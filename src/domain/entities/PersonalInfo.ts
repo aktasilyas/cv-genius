@@ -9,6 +9,7 @@ export const PersonalInfoSchema = z.object({
   linkedin: z.string().optional().or(z.literal('')),
   website: z.string().optional().or(z.literal('')),
   title: z.string(),
+  photo: z.string().optional().or(z.literal('')),
 });
 
 // Validation schema for complete CV (enforces required fields)
@@ -20,6 +21,7 @@ export const PersonalInfoValidationSchema = z.object({
   linkedin: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
   website: z.string().url('Invalid website URL').optional().or(z.literal('')),
   title: z.string().min(1, 'Title is required'),
+  photo: z.string().optional().or(z.literal('')),
 });
 
 export type PersonalInfo = z.infer<typeof PersonalInfoSchema>;
@@ -33,6 +35,7 @@ export const createPersonalInfo = (data: Partial<PersonalInfo>): PersonalInfo =>
     linkedin: data.linkedin ?? '',
     website: data.website ?? '',
     title: data.title ?? '',
+    photo: data.photo ?? '',
   });
 };
 
@@ -53,4 +56,5 @@ export const defaultPersonalInfo: PersonalInfo = {
   linkedin: '',
   website: '',
   title: '',
+  photo: '',
 };
